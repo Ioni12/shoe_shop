@@ -63,6 +63,10 @@ export default function App() {
             {/* Admin — guarded */}
             <Route element={<ProtectedRoute />}>
               <Route element={<AdminLayout />}>
+                <Route
+                  path="/admin"
+                  element={<Navigate to="/admin/products" replace />}
+                />
                 <Route path="/admin/products" element={<ProductsAdmin />} />
                 <Route path="/admin/products/new" element={<ProductForm />} />
                 <Route
