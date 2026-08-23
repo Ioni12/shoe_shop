@@ -1,0 +1,85 @@
+@import url("https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400&family=Public+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+}
+
+html,
+body {
+  background: #f6f4ef;
+}
+
+body {
+  font-family: "Public Sans", sans-serif;
+  color: #15150f;
+  -webkit-font-smoothing: antialiased;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Visible keyboard focus, everywhere */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+[tabindex]:focus-visible {
+  outline: 2px solid #6e2a35;
+  outline-offset: 2px;
+}
+
+/* ---- Signature element: the shoebox stamp ---- *
+   A stamped rectangle with corner ticks, borrowed from the little
+   printed spec box on a shoebox end-label (size / colorway / lot no).
+   Used for category tags, order numbers, status pills, and badges. */
+.stamp {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4em;
+  padding: 0.32em 0.75em;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  border: 1px solid currentColor;
+  line-height: 1;
+}
+
+.stamp::before,
+.stamp::after {
+  content: "";
+  position: absolute;
+  width: 5px;
+  height: 5px;
+  border-color: currentColor;
+  border-style: solid;
+  top: -1px;
+}
+
+.stamp::before {
+  left: -1px;
+  border-width: 1px 0 0 1px;
+}
+
+.stamp::after {
+  right: -1px;
+  border-width: 1px 1px 0 0;
+}
+
+.stitch {
+  border-top: 1px dashed #dbd7cc;
+}
