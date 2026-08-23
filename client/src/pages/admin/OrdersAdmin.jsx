@@ -54,19 +54,43 @@ export default function OrdersAdmin() {
             <Link
               key={o._id}
               to={`/admin/orders/${o._id}`}
-              className="py-4 flex items-center gap-4 hover:bg-panel/50 transition-colors -mx-2 px-2"
+              className="py-4 flex flex-col gap-2 md:flex-row md:items-center md:gap-4 hover:bg-panel/50 transition-colors -mx-2 px-2"
             >
-              <span className="font-mono text-sm w-28">{o.orderNumber}</span>
-              <span className="flex-1 text-sm">
+              {/* Mobile: top line — order number + status */}
+              <div className="flex items-center justify-between md:hidden">
+                <span className="font-mono text-sm">{o.orderNumber}</span>
+                <Stamp tone={o.status === "Cancelled" ? "stone" : "ink"}>
+                  {o.status}
+                </Stamp>
+              </div>
+
+              {/* Mobile: second line — name + date + price */}
+              <div className="flex items-center justify-between gap-3 md:hidden">
+                <span className="text-sm truncate">
+                  {o.customer?.firstName} {o.customer?.lastName}
+                </span>
+                <span className="text-xs text-stone font-mono whitespace-nowrap">
+                  {new Date(o.createdAt).toLocaleDateString()}
+                </span>
+                <span className="font-mono text-sm whitespace-nowrap">
+                  {formatPrice(o.total)}
+                </span>
+              </div>
+
+              {/* Desktop row (unchanged) */}
+              <span className="hidden md:inline font-mono text-sm w-28">
+                {o.orderNumber}
+              </span>
+              <span className="hidden md:inline flex-1 text-sm">
                 {o.customer?.firstName} {o.customer?.lastName}
               </span>
-              <span className="text-xs text-stone font-mono w-32">
+              <span className="hidden md:inline text-xs text-stone font-mono w-32">
                 {new Date(o.createdAt).toLocaleDateString()}
               </span>
-              <span className="font-mono text-sm w-24 text-right">
+              <span className="hidden md:inline font-mono text-sm w-24 text-right">
                 {formatPrice(o.total)}
               </span>
-              <span className="w-32 flex justify-end">
+              <span className="hidden md:flex w-32 justify-end">
                 <Stamp tone={o.status === "Cancelled" ? "stone" : "ink"}>
                   {o.status}
                 </Stamp>
