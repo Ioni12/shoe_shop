@@ -9,6 +9,7 @@ const {
   createProduct,
   updateProduct,
   deleteProduct,
+  removeProductImage,
 } = require("../controllers/productController");
 
 // Public routes
@@ -18,6 +19,7 @@ router.get("/", getProducts);
 router.get("/all", requireAuth, getAllProductsAdmin);
 router.post("/", requireAuth, upload.array("images", 6), createProduct);
 router.put("/:id", requireAuth, upload.array("images", 6), updateProduct);
+router.delete("/:id/images", requireAuth, removeProductImage); // must come before /:id
 router.delete("/:id", requireAuth, deleteProduct);
 
 // Public route with dynamic param — must be registered after /all

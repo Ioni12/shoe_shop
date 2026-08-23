@@ -138,7 +138,9 @@ export default function ProductForm() {
         <ProductVariantsEditor variants={variants} setVariants={setVariants} />
 
         <ProductImagesEditor
+          productId={isEdit ? id : null}
           existingImages={existingImages}
+          setExistingImages={setExistingImages}
           newImageFiles={newImageFiles}
           setNewImageFiles={setNewImageFiles}
         />

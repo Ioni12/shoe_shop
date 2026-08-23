@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { products as productsApi } from "../../api/client";
 import { getImageUrl } from "../../lib/format";
 
 const MAX_TOTAL = 6;
@@ -7,13 +8,17 @@ const ACCEPTED_TYPES = ["image/jpeg", "image/png", "image/webp"];
 const ACCEPTED_EXT = ".jpg,.jpeg,.png,.webp";
 
 export default function ProductImagesEditor({
+  productId,
   existingImages,
+  setExistingImages,
   newImageFiles,
   setNewImageFiles,
 }) {
   const [previews, setPreviews] = useState([]); // [{ file, url }]
   const [dragActive, setDragActive] = useState(false);
   const [validationError, setValidationError] = useState(null);
+  const [removingImage, setRemovingImage] = useState(null); // imagePath currently deleting
+  const [removeError, setRemoveError] = useState(null);
   const inputRef = useRef(null);
 
   const remainingSlots =
@@ -84,6 +89,28 @@ export default function ProductImagesEditor({
     setNewImageFiles((prev) => prev.filter((_, i) => i !== index));
   }
 
+  async function handleRemoveExisting(imagePath) {
+    setRemoveError(null);
+
+    if (existingImages.length <= 1) {
+      setRemoveError(
+        "A product must keep at least one image — add a replacement first.",
+      );
+      return;
+    }
+    if (!productId) return; // shouldn't happen (create mode has no existing images)
+
+    setRemovingImage(imagePath);
+    try {
+      const updated = await productsApi.removeImage(productId, imagePath);
+      setExistingImages(updated.images || []);
+    } catch (err) {
+      setRemoveError(err.message);
+    } finally {
+      setRemovingImage(null);
+    }
+  }
+
   const isFull = remainingSlots <= 0;
 
   return (
@@ -93,20 +120,41 @@ export default function ProductImagesEditor({
       {existingImages.length > 0 && (
         <div className="mb-4">
           <p className="text-xs text-stone mb-2">
-            Current images (removal isn't supported yet — new images are added
-            alongside these):
+            Current images
+            {existingImages.length === 1 &&
+              " — add a replacement before removing the last one."}
           </p>
           <div className="flex gap-3 flex-wrap">
             {existingImages.map((img) => (
-              <div key={img} className="w-20 h-20 bg-panel overflow-hidden">
+              <div
+                key={img}
+                className="relative w-20 h-20 bg-panel overflow-hidden"
+              >
                 <img
                   src={getImageUrl(img)}
                   alt=""
                   className="w-full h-full object-cover"
                 />
+                <button
+                  type="button"
+                  onClick={() => handleRemoveExisting(img)}
+                  disabled={removingImage === img || existingImages.length <= 1}
+                  aria-label="Remove image"
+                  title={
+                    existingImages.length <= 1
+                      ? "Add a replacement image before removing the last one"
+                      : "Remove image"
+                  }
+                  className="absolute top-0.5 right-0.5 w-5 h-5 flex items-center justify-center bg-ink/80 text-paper text-xs hover:bg-oxblood transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  {removingImage === img ? "…" : "×"}
+                </button>
               </div>
             ))}
           </div>
+          {removeError && (
+            <p className="text-xs text-oxblood mt-2">{removeError}</p>
+          )}
         </div>
       )}
 

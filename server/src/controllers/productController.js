@@ -1,4 +1,6 @@
 const Product = require("../models/Product");
+const path = require("path");
+const fs = require("fs");
 
 // GET /api/products
 // Public: list all active products. Supports optional ?category= filter.
@@ -128,6 +130,60 @@ async function deleteProduct(req, res, next) {
   }
 }
 
+// DELETE /api/products/:id/images
+// Admin only. Body: { imagePath: "/uploads/xxxx.jpg" }
+// Removes one image from the product's images array and deletes the file
+// from disk. Rejects if it would leave the product with zero images.
+async function removeProductImage(req, res, next) {
+  try {
+    const { imagePath } = req.body;
+    if (!imagePath) {
+      return res.status(400).json({ error: "imagePath is required" });
+    }
+
+    const product = await Product.findById(req.params.id);
+    if (!product) {
+      return res.status(404).json({ error: "Product not found" });
+    }
+
+    if (!product.images.includes(imagePath)) {
+      return res
+        .status(404)
+        .json({ error: "That image is not associated with this product" });
+    }
+
+    if (product.images.length === 1) {
+      return res.status(400).json({
+        error:
+          "Cannot remove the last image — a product must have at least one image, upload a replacement first",
+      });
+    }
+
+    product.images = product.images.filter((img) => img !== imagePath);
+    await product.save();
+
+    // Best-effort file cleanup — don't fail the request if this errors
+    // (e.g. file already missing), just log it.
+    const filename = path.basename(imagePath);
+    const filePath = path.join(__dirname, "..", "..", "uploads", filename);
+    fs.unlink(filePath, (err) => {
+      if (err && err.code !== "ENOENT") {
+        console.error(
+          `[products] failed to delete file ${filePath}:`,
+          err.message,
+        );
+      }
+    });
+
+    res.json(product);
+  } catch (err) {
+    if (err.name === "CastError") {
+      return res.status(400).json({ error: "Invalid product id" });
+    }
+    next(err);
+  }
+}
+
 module.exports = {
   getProducts,
   getAllProductsAdmin,
@@ -135,4 +191,5 @@ module.exports = {
   createProduct,
   updateProduct,
   deleteProduct,
+  removeProductImage,
 };
