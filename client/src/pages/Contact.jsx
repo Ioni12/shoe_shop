@@ -7,6 +7,22 @@ const socials = [
   { label: "Facebook", href: "https://facebook.com/kepuceearte" },
 ];
 
+const SHOP_WHATSAPP = "355698167273"; // country code + number, no + or spaces
+
+function buildWhatsAppLink(form) {
+  const lines = [
+    `New message from the website:`,
+    `Name: ${form.name}`,
+    `Email: ${form.email}`,
+    form.phone ? `Phone: ${form.phone}` : null,
+    ``,
+    form.message,
+  ].filter(Boolean);
+
+  const text = encodeURIComponent(lines.join("\n"));
+  return `https://wa.me/${SHOP_WHATSAPP}?text=${text}`;
+}
+
 function InfoBlock() {
   return (
     <div>
@@ -49,10 +65,10 @@ function InfoBlock() {
           <dt className="stamp text-ink mb-1">Phone</dt>
           <dd className="text-stone">
             <a
-              href="tel:+355691234567"
+              href="tel:+355698167273"
               className="hover:text-oxblood transition-colors"
             >
-              +355 69 123 4567
+              +355 69 81 67 273
             </a>
           </dd>
         </div>
@@ -202,7 +218,8 @@ export default function Contact() {
 
   function handleSubmit(e) {
     e.preventDefault();
-    // Front-end only for now — no backend endpoint exists yet.
+    const url = buildWhatsAppLink(form);
+    window.open(url, "_blank", "noopener,noreferrer");
     setSubmitted(true);
     setForm({ name: "", email: "", phone: "", message: "" });
   }
