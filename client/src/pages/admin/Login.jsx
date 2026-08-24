@@ -36,7 +36,7 @@ export default function Login() {
           <Stamp tone="oxblood" className="mb-4">
             Admin
           </Stamp>
-          <h1 className="font-display text-3xl">Marlow &amp; Sole</h1>
+          <h1 className="font-display text-3xl">Kepuca e arte</h1>
         </div>
 
         {error && (
