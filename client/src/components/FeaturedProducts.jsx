@@ -11,6 +11,7 @@ export default function FeaturedProducts({ products }) {
   const [dragging, setDragging] = useState(false);
   const trackRef = useRef(null);
   const dragStart = useRef(null);
+  const pointerMoved = useRef(false);
   const featured = useMemo(
     () => shuffle(products).slice(0, MAX_PRODUCTS),
     [products],
@@ -22,20 +23,22 @@ export default function FeaturedProducts({ products }) {
     trackRef.current?.scrollBy({ left: direction * 280, behavior: "smooth" });
   };
 
+  // Mouse-only drag (desktop click-and-drag). Touch uses native scrolling
+  // for correct momentum/inertia and snap behavior on mobile.
   const startDrag = (event) => {
-    const point = event.touches?.[0] ?? event;
     dragStart.current = {
-      x: point.clientX,
+      x: event.clientX,
       scrollLeft: trackRef.current.scrollLeft,
     };
+    pointerMoved.current = false;
     setDragging(true);
   };
 
   const drag = (event) => {
     if (!dragStart.current || !trackRef.current) return;
-    const point = event.touches?.[0] ?? event;
+    pointerMoved.current = true;
     trackRef.current.scrollLeft =
-      dragStart.current.scrollLeft - (point.clientX - dragStart.current.x);
+      dragStart.current.scrollLeft - (event.clientX - dragStart.current.x);
   };
 
   const endDrag = () => {
@@ -52,14 +55,18 @@ export default function FeaturedProducts({ products }) {
     >
       <div
         ref={trackRef}
-        className={`flex gap-4 sm:gap-6 overflow-x-auto overscroll-x-contain pb-4 snap-x snap-mandatory ${dragging ? "cursor-grabbing select-none" : "cursor-grab"}`}
+        className={`flex gap-4 sm:gap-6 overflow-x-auto overscroll-x-contain pb-4 snap-x snap-mandatory scroll-smooth [-webkit-overflow-scrolling:touch] [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden ${dragging ? "cursor-grabbing select-none" : "cursor-grab"}`}
+        style={{ touchAction: "pan-x" }}
         onMouseDown={startDrag}
         onMouseMove={drag}
         onMouseUp={endDrag}
         onMouseLeave={endDrag}
-        onTouchStart={startDrag}
-        onTouchMove={drag}
-        onTouchEnd={endDrag}
+        onClickCapture={(event) => {
+          if (pointerMoved.current) {
+            event.preventDefault();
+            event.stopPropagation();
+          }
+        }}
         onKeyDown={(event) => {
           if (event.key === "ArrowLeft") move(-1);
           if (event.key === "ArrowRight") move(1);
