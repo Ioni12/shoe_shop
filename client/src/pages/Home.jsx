@@ -71,114 +71,55 @@ export default function Home() {
   return (
     <div>
       {/* Hero */}
-      <section className="border-b border-stone-line overflow-hidden">
-        <div className="mx-auto max-w-6xl px-5 sm:px-6 md:px-8 py-12 sm:py-16 md:py-28 grid md:grid-cols-[1.2fr,1fr] gap-8 sm:gap-10 md:gap-12 items-end">
-          <div>
-            <Stamp tone="oxblood" className="mb-4 sm:mb-6">
-              Est. Tirana
-            </Stamp>
-            <h1 className="font-display text-4xl sm:text-5xl md:text-7xl leading-[0.95] tracking-tight">
-              Shoes made
-              <br />
-              for walking.
-            </h1>
-            <p className="mt-4 sm:mt-6 max-w-md text-stone leading-relaxed text-sm sm:text-base">
-              Këpucë e Artë is a small footwear shop in Tirana — honest
-              materials, real stitching, no gimmicks. Every pair ships pay on
-              delivery, nothing to enter online.
-            </p>
-            <div className="mt-6 sm:mt-8 flex flex-wrap gap-3 sm:gap-4">
-              <Link
-                to="/products"
-                className="inline-flex items-center justify-center px-5 sm:px-6 py-3 bg-ink text-paper font-mono text-xs uppercase tracking-stamp hover:bg-oxblood transition-colors w-full sm:w-auto"
-              >
-                Shop the collection
-              </Link>
-              <Link
-                to="/contact"
-                className="inline-flex items-center justify-center px-5 sm:px-6 py-3 border border-ink font-mono text-xs uppercase tracking-stamp hover:border-oxblood hover:text-oxblood transition-colors w-full sm:w-auto"
-              >
-                Visit the shop
-              </Link>
-            </div>
-          </div>
+      <section className="relative border-b border-stone-line overflow-hidden">
+        {/* Full-bleed background image */}
+        <div className="absolute inset-0">
+          <img
+            src="/images/hero.jpg"
+            alt=""
+            className="w-full h-full object-cover"
+          />
+          {/* Darken + gradient so white-outlined text stays legible on a bright photo */}
+          <div className="absolute inset-0 bg-ink/50" />
+          <div className="absolute inset-0 bg-gradient-to-t from-ink/70 via-ink/20 to-ink/10" />
+        </div>
 
-          {/* Generated pattern placeholder */}
-          <div className="aspect-[4/5] bg-panel relative overflow-hidden">
-            <svg
-              viewBox="0 0 400 500"
-              className="absolute inset-0 w-full h-full"
-              preserveAspectRatio="xMidYMid slice"
+        <div className="relative mx-auto max-w-6xl px-5 sm:px-6 md:px-8 py-16 sm:py-24 md:py-40 flex flex-col items-start">
+          <Stamp tone="oxblood" className="mb-4 sm:mb-6">
+            Est. Tirana
+          </Stamp>
+          <h1
+            className="font-display text-4xl sm:text-5xl md:text-7xl leading-[0.95] tracking-tight text-transparent"
+            style={{
+              WebkitTextStroke: "1.5px white",
+              textShadow: "0 1px 24px rgba(0,0,0,0.35)",
+            }}
+          >
+            Shoes made
+            <br />
+            for walking.
+          </h1>
+          <p className="mt-4 sm:mt-6 max-w-md text-paper/90 leading-relaxed text-sm sm:text-base">
+            Këpucë e Artë is a small footwear shop in Tirana — honest materials,
+            real stitching, no gimmicks. Every pair ships pay on delivery,
+            nothing to enter online.
+          </p>
+          <div className="mt-6 sm:mt-8 flex flex-wrap gap-3 sm:gap-4">
+            <Link
+              to="/products"
+              className="inline-flex items-center justify-center px-5 sm:px-6 py-3 bg-paper text-ink font-mono text-xs uppercase tracking-stamp hover:bg-oxblood hover:text-paper transition-colors w-full sm:w-auto"
             >
-              <defs>
-                <pattern
-                  id="stitchGrid"
-                  width="40"
-                  height="40"
-                  patternUnits="userSpaceOnUse"
-                >
-                  <path
-                    d="M0 0 L40 40 M40 0 L0 40"
-                    stroke="currentColor"
-                    strokeWidth="0.5"
-                    className="text-ink/10"
-                  />
-                </pattern>
-              </defs>
-              <rect width="400" height="500" fill="url(#stitchGrid)" />
-              <circle
-                cx="200"
-                cy="220"
-                r="120"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1"
-                className="text-ink/25"
-              />
-              <circle
-                cx="200"
-                cy="220"
-                r="90"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="0.5"
-                className="text-ink/20"
-              />
-              <path
-                d="M120 320 Q140 260 200 250 Q260 240 260 300 Q260 340 220 350 Q160 365 120 340 Z"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.5"
-                className="text-ink/40"
-              />
-              <line
-                x1="160"
-                y1="270"
-                x2="160"
-                y2="330"
-                stroke="currentColor"
-                strokeWidth="0.5"
-                className="text-ink/30"
-              />
-              <line
-                x1="200"
-                y1="260"
-                x2="200"
-                y2="335"
-                stroke="currentColor"
-                strokeWidth="0.5"
-                className="text-ink/30"
-              />
-            </svg>
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="stamp text-ink text-xs text-center px-4">
-                Këpucë e Artë — Tirana
-              </div>
-            </div>
+              Shop the collection
+            </Link>
+            <Link
+              to="/contact"
+              className="inline-flex items-center justify-center px-5 sm:px-6 py-3 border border-paper text-paper font-mono text-xs uppercase tracking-stamp hover:border-oxblood hover:text-oxblood transition-colors w-full sm:w-auto"
+            >
+              Visit the shop
+            </Link>
           </div>
         </div>
       </section>
-
       {/* Featured products */}
       <section className="mx-auto max-w-6xl px-5 sm:px-6 md:px-8 py-12 sm:py-16 md:py-24">
         <div className="flex items-end justify-between mb-6 sm:mb-10 gap-4">
