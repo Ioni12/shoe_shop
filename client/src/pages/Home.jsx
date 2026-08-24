@@ -38,16 +38,19 @@ const process = [
     step: "01",
     title: "Honest materials",
     body: "Full-grain leather and natural soles, sourced for durability, not shortcuts.",
+    image: "/images/process1.webp",
   },
   {
     step: "02",
     title: "Hand-stitched",
     body: "Each pair built and finished in our Tirana workshop, not off a factory line.",
+    image: "/images/process2.webp",
   },
   {
     step: "03",
     title: "Delivered, paid on arrival",
     body: "No online payment required — you inspect the pair, then pay at the door.",
+    image: "/images/process3.webp",
   },
 ];
 
@@ -79,7 +82,7 @@ function HeroBackground() {
           src={src}
           alt=""
           className="absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 ease-in-out"
-          style={{ opacity: i === index ? 1 : 0 }}
+          style={{ opacity: i === index ? 1 : 0, objectPosition: "center 20%" }}
         />
       ))}
       {/* Darken + gradient so outlined text stays legible on bright photos */}
@@ -210,6 +213,13 @@ export default function Home() {
           <div className="grid sm:grid-cols-3 gap-8 sm:gap-6 md:gap-10">
             {process.map((p) => (
               <div key={p.step}>
+                <div className="aspect-square w-full mb-4 overflow-hidden bg-panel">
+                  <img
+                    src={p.image}
+                    alt=""
+                    className="w-full h-full object-cover"
+                  />
+                </div>
                 <span className="font-mono text-xs text-oxblood tracking-stamp">
                   {p.step}
                 </span>
