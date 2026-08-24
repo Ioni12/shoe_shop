@@ -56,7 +56,7 @@ export default function FeaturedProducts({ products }) {
       <div
         ref={trackRef}
         className={`flex gap-4 sm:gap-6 overflow-x-auto overscroll-x-contain pb-4 snap-x snap-mandatory scroll-smooth [-webkit-overflow-scrolling:touch] [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden ${dragging ? "cursor-grabbing select-none" : "cursor-grab"}`}
-        style={{ touchAction: "pan-x" }}
+        style={{ touchAction: "pan-x pan-y" }}
         onMouseDown={startDrag}
         onMouseMove={drag}
         onMouseUp={endDrag}
