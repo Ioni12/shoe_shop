@@ -117,41 +117,10 @@ export default function FeaturedProducts({ products }) {
         ))}
       </div>
 
-      <div className="mt-4 flex items-center justify-between gap-4">
-        <p className="font-mono text-[10px] uppercase tracking-stamp text-stone">
-          {featured.length} featured {featured.length === 1 ? "pair" : "pairs"}
-          {reducedMotion ? " · motion reduced" : ""}
-        </p>
-        <div className="flex items-center gap-2">
-          <button
-            type="button"
-            className="border border-stone-line px-3 py-2 font-mono text-[10px] uppercase tracking-stamp hover:border-oxblood hover:text-oxblood"
-            onClick={() => move(-1)}
-            aria-label="Previous featured product"
-          >
-            ←
-          </button>
-          <button
-            type="button"
-            className="border border-ink px-3 py-2 font-mono text-[10px] uppercase tracking-stamp hover:bg-ink hover:text-paper"
-            onClick={() => setPaused((value) => !value)}
-            aria-pressed={paused}
-            aria-label={
-              paused ? "Play featured products" : "Pause featured products"
-            }
-          >
-            {paused ? "Play" : "Pause"}
-          </button>
-          <button
-            type="button"
-            className="border border-stone-line px-3 py-2 font-mono text-[10px] uppercase tracking-stamp hover:border-oxblood hover:text-oxblood"
-            onClick={() => move(1)}
-            aria-label="Next featured product"
-          >
-            →
-          </button>
-        </div>
-      </div>
+      <p className="mt-4 font-mono text-[10px] uppercase tracking-stamp text-stone">
+        {featured.length} featured {featured.length === 1 ? "pair" : "pairs"}
+        {reducedMotion ? " · motion reduced" : ""}
+      </p>
     </div>
   );
 }
