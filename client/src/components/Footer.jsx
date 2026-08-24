@@ -12,6 +12,11 @@ export default function Footer() {
             Shoes built to be worn, not admired from a shelf. Rruga Myslym Shyri
             49, Tirana.
           </p>
+          <div className="mt-3 sm:mt-4 text-xs sm:text-sm text-stone">
+            <span className="stamp text-ink mr-2">Pay on delivery</span>
+            Tirana &amp; nationwide
+          </div>
+          <div className="mt-4 sm:mt-5 text-[10px] sm:text-[11px] font-mono uppercase tracking-stamp text-stone/70 leading-relaxed"></div>
         </div>
         <div>
           <div className="stamp text-ink mb-2 sm:mb-3">Visit</div>
@@ -49,7 +54,8 @@ export default function Footer() {
       </div>
       <div className="stitch">
         <div className="mx-auto max-w-6xl px-5 sm:px-6 md:px-8 py-3 sm:py-4 text-[10px] sm:text-[11px] font-mono uppercase tracking-stamp text-stone text-center">
-          Pay on delivery, Tirana &amp; nationwide
+          <div>© 2026 Këpucë e Artë. All rights reserved.</div>
+          <div>Këpucë e Artë® is a registered trademark.</div>
         </div>
       </div>
     </footer>
