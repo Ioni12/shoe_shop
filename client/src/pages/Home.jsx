@@ -6,11 +6,11 @@ import Directions from "../components/Directions";
 import { products as productsApi } from "../api/client";
 
 const HERO_IMAGES = [
-  "/images/hero1.jpg",
-  "/images/hero2.jpg",
-  "/images/hero3.jpg",
+  "/images/hero1.webp",
+  "/images/hero2.webp",
+  "/images/hero3.webp",
 ];
-const HERO_INTERVAL_MS = 5000;
+const HERO_INTERVAL_MS = 1500;
 
 const testimonials = [
   {
