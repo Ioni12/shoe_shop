@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import Stamp from "../components/Stamp";
-import ProductCard from "../components/ProductCard";
+import FeaturedProducts from "../components/FeaturedProducts";
 import Directions from "../components/Directions";
 import { products as productsApi } from "../api/client";
 
@@ -54,7 +54,7 @@ export default function Home() {
     productsApi
       .list()
       .then((data) => {
-        if (!cancelled) setFeatured(data.slice(0, 4));
+        if (!cancelled) setFeatured(data);
       })
       .catch(() => {
         // quiet failure — featured section just falls back to empty state
@@ -200,11 +200,7 @@ export default function Home() {
         )}
 
         {!loading && featured.length > 0 && (
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-x-4 sm:gap-x-6 gap-y-8 sm:gap-y-12">
-            {featured.map((p) => (
-              <ProductCard key={p._id} product={p} />
-            ))}
-          </div>
+          <FeaturedProducts products={featured} />
         )}
       </section>
 
