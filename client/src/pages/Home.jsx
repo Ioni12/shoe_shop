@@ -89,10 +89,12 @@ export default function Home() {
             Est. Tirana
           </Stamp>
           <h1
-            className="font-display text-4xl sm:text-5xl md:text-7xl leading-[0.95] tracking-tight text-transparent"
+            className="font-display text-4xl sm:text-5xl md:text-7xl leading-[0.95] tracking-tight text-ink"
             style={{
-              WebkitTextStroke: "1.5px white",
-              textShadow: "0 1px 24px rgba(0,0,0,0.35)",
+              WebkitTextStroke: "0.75px white",
+              paintOrder: "stroke fill",
+              textShadow:
+                "0 0 1px #fff, 0 0 1px #fff, 0 0 1px #fff, 0 2px 20px rgba(0,0,0,0.25)",
             }}
           >
             Shoes made
@@ -120,6 +122,7 @@ export default function Home() {
           </div>
         </div>
       </section>
+
       {/* Featured products */}
       <section className="mx-auto max-w-6xl px-5 sm:px-6 md:px-8 py-12 sm:py-16 md:py-24">
         <div className="flex items-end justify-between mb-6 sm:mb-10 gap-4">
