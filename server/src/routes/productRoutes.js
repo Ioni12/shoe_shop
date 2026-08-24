@@ -11,6 +11,10 @@ const {
   deleteProduct,
   removeProductImage,
 } = require("../controllers/productController");
+const {
+  getProductReviews,
+  createReview,
+} = require("../controllers/reviewController");
 
 // Public routes
 router.get("/", getProducts);
@@ -22,7 +26,11 @@ router.put("/:id", requireAuth, upload.array("images", 6), updateProduct);
 router.delete("/:id/images", requireAuth, removeProductImage); // must come before /:id
 router.delete("/:id", requireAuth, deleteProduct);
 
-// Public route with dynamic param — must be registered after /all
+// Reviews nested under a product — must come before /:id
+router.get("/:productId/reviews", getProductReviews);
+router.post("/:productId/reviews", createReview);
+
+// Public route with dynamic param — must be registered after /all and /:id/reviews
 router.get("/:id", getProductById);
 
 module.exports = router;

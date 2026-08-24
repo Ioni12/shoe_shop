@@ -80,6 +80,17 @@ export const products = {
     }),
 };
 
+export const reviews = {
+  list: (productId) => request(`/products/${productId}/reviews`),
+  create: (productId, data) =>
+    request(`/products/${productId}/reviews`, {
+      method: "POST",
+      body: data, // was: JSON.stringify(data) — request() already stringifies, this was double-encoding
+    }),
+  listAll: () => request("/reviews", { auth: true }),
+  remove: (id) => request(`/reviews/${id}`, { method: "DELETE", auth: true }),
+};
+
 export const orders = {
   create: (order) => request("/orders", { method: "POST", body: order }),
   track: (orderNumber) =>

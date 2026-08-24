@@ -4,6 +4,7 @@ import Stamp from "../components/Stamp";
 import ProductImageGallery from "../components/ProductImageGallery";
 import RelatedProducts from "../components/RelatedProducts";
 import ExpandableText from "../components/ExpandableText";
+import ReviewsSection from "../components/ReviewsSection";
 import { products as productsApi } from "../api/client";
 import { formatPrice } from "../lib/format";
 import { useCart } from "../context/CartContext";
@@ -238,6 +239,8 @@ export default function ProductDetail() {
           )}
         </div>
       </div>
+
+      <ReviewsSection productId={product._id} />
 
       <RelatedProducts
         currentProductId={product._id}

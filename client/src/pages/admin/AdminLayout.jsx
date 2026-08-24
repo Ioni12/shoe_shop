@@ -28,6 +28,9 @@ export default function AdminLayout() {
               <NavLink to="/admin/orders" className={linkClass}>
                 Orders
               </NavLink>
+              <NavLink to="/admin/reviews" className={linkClass}>
+                Reviews
+              </NavLink>
             </nav>
           </div>
 
@@ -72,6 +75,13 @@ export default function AdminLayout() {
               onClick={() => setMenuOpen(false)}
             >
               Orders
+            </NavLink>
+            <NavLink
+              to="/admin/reviews"
+              className={linkClass}
+              onClick={() => setMenuOpen(false)}
+            >
+              Reviews
             </NavLink>
           </nav>
         )}

@@ -28,6 +28,7 @@ import ProductsAdmin from "./pages/admin/ProductsAdmin";
 import ProductForm from "./pages/admin/ProductForm";
 import OrdersAdmin from "./pages/admin/OrdersAdmin";
 import OrderDetail from "./pages/admin/OrderDetail";
+import ReviewsAdmin from "./pages/admin/ReviewsAdmin";
 
 function PublicLayout() {
   return (
@@ -81,6 +82,7 @@ export default function App() {
                 />
                 <Route path="/admin/orders" element={<OrdersAdmin />} />
                 <Route path="/admin/orders/:id" element={<OrderDetail />} />
+                <Route path="/admin/reviews" element={<ReviewsAdmin />} />
               </Route>
             </Route>
 

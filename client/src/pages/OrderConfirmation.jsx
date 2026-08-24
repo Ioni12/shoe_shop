@@ -1,6 +1,7 @@
 import { Link, useLocation } from "react-router-dom";
 import Stamp from "../components/Stamp";
 import { formatPrice } from "../lib/format";
+import { saveOrderToDevice, shareOrder } from "../lib/orderActions";
 
 export default function OrderConfirmation() {
   const location = useLocation();
@@ -21,6 +22,14 @@ export default function OrderConfirmation() {
         </Link>
       </div>
     );
+  }
+
+  function handleSave() {
+    saveOrderToDevice(order);
+  }
+
+  async function handleShare() {
+    await shareOrder(order);
   }
 
   return (
@@ -68,6 +77,23 @@ export default function OrderConfirmation() {
         <span className="font-display text-2xl">
           {formatPrice(order.total)}
         </span>
+      </div>
+
+      <div className="mt-8 grid grid-cols-2 gap-3">
+        <button
+          type="button"
+          onClick={handleSave}
+          className="px-4 py-3 border border-ink text-ink font-mono text-xs uppercase tracking-stamp hover:bg-ink hover:text-paper transition-colors"
+        >
+          Save to device
+        </button>
+        <button
+          type="button"
+          onClick={handleShare}
+          className="px-4 py-3 border border-ink text-ink font-mono text-xs uppercase tracking-stamp hover:bg-ink hover:text-paper transition-colors"
+        >
+          Send to WhatsApp
+        </button>
       </div>
 
       <div className="mt-10 text-center">

@@ -1,6 +1,8 @@
 import { Link } from "react-router-dom";
 
 export default function Footer() {
+  const year = new Date().getFullYear();
+
   return (
     <footer className="border-t border-stone-line mt-12 sm:mt-16 md:mt-24">
       <div className="mx-auto max-w-6xl px-5 sm:px-6 md:px-8 py-8 sm:py-10 md:py-12 grid gap-6 sm:gap-8 md:gap-10 grid-cols-2 md:grid-cols-3 font-body text-sm text-ink/80">
@@ -12,11 +14,9 @@ export default function Footer() {
             Shoes built to be worn, not admired from a shelf. Rruga Myslym Shyri
             49, Tirana.
           </p>
-          <div className="mt-3 sm:mt-4 text-xs sm:text-sm text-stone">
-            <span className="stamp text-ink mr-2">Pay on delivery</span>
-            Tirana &amp; nationwide
-          </div>
-          <div className="mt-4 sm:mt-5 text-[10px] sm:text-[11px] font-mono uppercase tracking-stamp text-stone/70 leading-relaxed"></div>
+          <p className="text-stone text-xs sm:text-sm mt-2">
+            Pay on delivery, Tirana &amp; nationwide.
+          </p>
         </div>
         <div>
           <div className="stamp text-ink mb-2 sm:mb-3">Visit</div>
@@ -54,8 +54,7 @@ export default function Footer() {
       </div>
       <div className="stitch">
         <div className="mx-auto max-w-6xl px-5 sm:px-6 md:px-8 py-3 sm:py-4 text-[10px] sm:text-[11px] font-mono uppercase tracking-stamp text-stone text-center">
-          <div>© 2026 Këpucë e Artë. All rights reserved.</div>
-          <div>Këpucë e Artë® is a registered trademark.</div>
+          © {year} Këpucë e Artë™. All rights reserved.
         </div>
       </div>
     </footer>

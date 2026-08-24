@@ -42,8 +42,14 @@ export default function Checkout() {
           variant: i.variant,
         })),
       });
-      clearCart();
+
+      // Navigate FIRST, then clear the cart. If we clear the cart before
+      // navigating, `items` becomes empty on the next render, the
+      // `items.length === 0` guard above fires and redirects to /cart
+      // (replace) — winning the race against the intended
+      // /order-confirmation navigation. Order matters here.
       navigate("/order-confirmation", { state: { order } });
+      clearCart();
     } catch (err) {
       setError(err.message);
       setSubmitting(false);
