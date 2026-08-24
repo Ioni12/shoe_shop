@@ -17,7 +17,7 @@ const testimonials = [
     quote:
       "Bought my second pair this year. Stitching hasn't budged, and the leather only gets better with wear.",
     name: "Elira B.",
-    location: "Tirana",
+    location: "VLore",
   },
   {
     quote:
@@ -43,7 +43,7 @@ const process = [
   {
     step: "02",
     title: "Hand-stitched",
-    body: "Each pair built and finished in our Tirana workshop, not off a factory line.",
+    body: "Each pair built and finished in our Vlore workshop, not off a factory line.",
     image: "/images/process2.webp",
   },
   {
@@ -124,7 +124,7 @@ export default function Home() {
 
         <div className="relative mx-auto max-w-6xl px-5 sm:px-6 md:px-8 py-16 sm:py-24 md:py-40 flex flex-col items-start">
           <Stamp tone="oxblood" className="mb-4 sm:mb-6">
-            Est. Tirana
+            Est. Vlore
           </Stamp>
           <h1
             className="font-display text-4xl sm:text-5xl md:text-7xl leading-[0.95] tracking-tight text-ink"
@@ -139,7 +139,7 @@ export default function Home() {
             for walking.
           </h1>
           <p className="mt-4 sm:mt-6 max-w-md text-paper/90 leading-relaxed text-sm sm:text-base">
-            Këpucë e Artë is a small footwear shop in Tirana — honest materials,
+            Këpucë e Artë is a small footwear shop in Vlore — honest materials,
             real stitching, no gimmicks. Every pair ships pay on delivery,
             nothing to enter online.
           </p>
@@ -193,7 +193,7 @@ export default function Home() {
               Our craft
             </Stamp>
             <h2 className="font-display text-2xl sm:text-3xl md:text-4xl leading-tight tracking-tight">
-              Built by hand, in a small workshop in Tirana.
+              Built by hand, in a small workshop in Vlore.
             </h2>
           </div>
           <p className="text-stone leading-relaxed text-sm sm:text-base">

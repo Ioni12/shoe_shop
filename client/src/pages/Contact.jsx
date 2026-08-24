@@ -40,9 +40,7 @@ function InfoBlock() {
         </div>
         <div>
           <dt className="stamp text-ink mb-1">Address</dt>
-          <dd className="text-stone">
-            Rruga Myslym Shyri 49, 1001 Tirana, Albania
-          </dd>
+          <dd className="text-stone">Vlore, Albania</dd>
         </div>
         <div>
           <dt className="stamp text-ink mb-1">Hours</dt>

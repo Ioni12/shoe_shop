@@ -1,6 +1,6 @@
 import Stamp from "./Stamp";
 
-const SHOP_ADDRESS = "Rruga Myslym Shyri 49, 1001 Tirana, Albania";
+const SHOP_ADDRESS = "Lungomare, 9401 Vlorë, Albania";
 const MAPS_QUERY = encodeURIComponent(SHOP_ADDRESS);
 const MAPS_EMBED_SRC = `https://www.google.com/maps?q=${MAPS_QUERY}&output=embed`;
 const MAPS_DIRECTIONS_HREF = `https://www.google.com/maps/dir/?api=1&destination=${MAPS_QUERY}`;
