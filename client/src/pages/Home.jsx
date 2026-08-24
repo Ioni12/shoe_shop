@@ -5,6 +5,13 @@ import FeaturedProducts from "../components/FeaturedProducts";
 import Directions from "../components/Directions";
 import { products as productsApi } from "../api/client";
 
+const HERO_IMAGES = [
+  "/images/hero1.jpg",
+  "/images/hero2.jpg",
+  "/images/hero3.jpg",
+];
+const HERO_INTERVAL_MS = 5000;
+
 const testimonials = [
   {
     quote:
@@ -44,6 +51,44 @@ const process = [
   },
 ];
 
+function HeroBackground() {
+  const [index, setIndex] = useState(0);
+  const [reducedMotion, setReducedMotion] = useState(false);
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const update = () => setReducedMotion(mediaQuery.matches);
+    update();
+    mediaQuery.addEventListener("change", update);
+    return () => mediaQuery.removeEventListener("change", update);
+  }, []);
+
+  useEffect(() => {
+    if (reducedMotion || HERO_IMAGES.length <= 1) return;
+    const id = setInterval(() => {
+      setIndex((i) => (i + 1) % HERO_IMAGES.length);
+    }, HERO_INTERVAL_MS);
+    return () => clearInterval(id);
+  }, [reducedMotion]);
+
+  return (
+    <div className="absolute inset-0">
+      {HERO_IMAGES.map((src, i) => (
+        <img
+          key={src}
+          src={src}
+          alt=""
+          className="absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 ease-in-out"
+          style={{ opacity: i === index ? 1 : 0 }}
+        />
+      ))}
+      {/* Darken + gradient so outlined text stays legible on bright photos */}
+      <div className="absolute inset-0 bg-ink/50" />
+      <div className="absolute inset-0 bg-gradient-to-t from-ink/70 via-ink/20 to-ink/10" />
+    </div>
+  );
+}
+
 export default function Home() {
   const [featured, setFeatured] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -72,17 +117,7 @@ export default function Home() {
     <div>
       {/* Hero */}
       <section className="relative border-b border-stone-line overflow-hidden">
-        {/* Full-bleed background image */}
-        <div className="absolute inset-0">
-          <img
-            src="/images/hero.jpg"
-            alt=""
-            className="w-full h-full object-cover"
-          />
-          {/* Darken + gradient so white-outlined text stays legible on a bright photo */}
-          <div className="absolute inset-0 bg-ink/50" />
-          <div className="absolute inset-0 bg-gradient-to-t from-ink/70 via-ink/20 to-ink/10" />
-        </div>
+        <HeroBackground />
 
         <div className="relative mx-auto max-w-6xl px-5 sm:px-6 md:px-8 py-16 sm:py-24 md:py-40 flex flex-col items-start">
           <Stamp tone="oxblood" className="mb-4 sm:mb-6">
@@ -91,10 +126,9 @@ export default function Home() {
           <h1
             className="font-display text-4xl sm:text-5xl md:text-7xl leading-[0.95] tracking-tight text-ink"
             style={{
-              WebkitTextStroke: "0.75px white",
+              WebkitTextStroke: "0.4px white",
               paintOrder: "stroke fill",
-              textShadow:
-                "0 0 1px #fff, 0 0 1px #fff, 0 0 1px #fff, 0 2px 20px rgba(0,0,0,0.25)",
+              textShadow: "0 0 1px #fff, 0 2px 20px rgba(0,0,0,0.2)",
             }}
           >
             Shoes made
