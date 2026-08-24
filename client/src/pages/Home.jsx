@@ -10,7 +10,7 @@ const HERO_IMAGES = [
   "/images/hero2.webp",
   "/images/hero3.webp",
 ];
-const HERO_INTERVAL_MS = 1500;
+const HERO_INTERVAL_MS = 2000;
 
 const testimonials = [
   {
