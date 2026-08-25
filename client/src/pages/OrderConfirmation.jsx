@@ -2,6 +2,7 @@ import { Link, useLocation } from "react-router-dom";
 import Stamp from "../components/Stamp";
 import { formatPrice } from "../lib/format";
 import { saveOrderToDevice, shareOrder } from "../lib/orderActions";
+import { saveOrderReceiptImage } from "../lib/orderReceiptImage";
 
 export default function OrderConfirmation() {
   const location = useLocation();
@@ -26,6 +27,10 @@ export default function OrderConfirmation() {
 
   function handleSave() {
     saveOrderToDevice(order);
+  }
+
+  function handleSaveImage() {
+    saveOrderReceiptImage(order);
   }
 
   async function handleShare() {
@@ -79,13 +84,20 @@ export default function OrderConfirmation() {
         </span>
       </div>
 
-      <div className="mt-8 grid grid-cols-2 gap-3">
+      <div className="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-3">
         <button
           type="button"
           onClick={handleSave}
           className="px-4 py-3 border border-ink text-ink font-mono text-xs uppercase tracking-stamp hover:bg-ink hover:text-paper transition-colors"
         >
-          Save to device
+          Save as text
+        </button>
+        <button
+          type="button"
+          onClick={handleSaveImage}
+          className="px-4 py-3 border border-ink text-ink font-mono text-xs uppercase tracking-stamp hover:bg-ink hover:text-paper transition-colors"
+        >
+          Save as image
         </button>
         <button
           type="button"

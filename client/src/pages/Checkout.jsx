@@ -18,8 +18,13 @@ export default function Checkout() {
   });
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
+  const [orderPlaced, setOrderPlaced] = useState(false);
 
-  if (items.length === 0) {
+  // Once an order has been successfully placed, never redirect to /cart
+  // again for the rest of this component's life — even if cartCart() causes
+  // items to become empty and this component re-renders before React
+  // Router finishes transitioning to /order-confirmation.
+  if (items.length === 0 && !orderPlaced) {
     return <Navigate to="/cart" replace />;
   }
 
@@ -32,6 +37,7 @@ export default function Checkout() {
     e.preventDefault();
     setSubmitting(true);
     setError(null);
+    console.log("[DEBUG] handleSubmit fired");
 
     try {
       const order = await ordersApi.create({
@@ -42,15 +48,21 @@ export default function Checkout() {
           variant: i.variant,
         })),
       });
+      console.log("[DEBUG] order created, response:", order);
 
-      // Navigate FIRST, then clear the cart. If we clear the cart before
-      // navigating, `items` becomes empty on the next render, the
-      // `items.length === 0` guard above fires and redirects to /cart
-      // (replace) — winning the race against the intended
-      // /order-confirmation navigation. Order matters here.
+      // Set this BEFORE navigate/clearCart — it permanently disables the
+      // items.length===0 guard above, so no re-render of this component
+      // (however it's timed relative to the route transition) can ever
+      // redirect to /cart again once an order has actually been placed.
+      setOrderPlaced(true);
+
+      console.log("[DEBUG] about to navigate to /order-confirmation");
       navigate("/order-confirmation", { state: { order } });
+      console.log("[DEBUG] navigate() called");
       clearCart();
+      console.log("[DEBUG] cart cleared");
     } catch (err) {
+      console.log("[DEBUG] caught error:", err);
       setError(err.message);
       setSubmitting(false);
     }
