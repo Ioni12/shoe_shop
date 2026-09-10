@@ -10,7 +10,7 @@ export function getImageUrl(path) {
 export function formatPrice(value) {
   if (value === null || value === undefined || Number.isNaN(Number(value)))
     return "";
-  return `ALL${Number(value).toFixed(2)}`;
+  return `ALL ${Number(value).toFixed(2)}`;
 }
 
 export function formatDate(value) {
