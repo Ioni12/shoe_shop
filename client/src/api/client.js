@@ -93,8 +93,10 @@ export const reviews = {
 
 export const orders = {
   create: (order) => request("/orders", { method: "POST", body: order }),
-  track: (orderNumber) =>
-    request(`/orders/track/${encodeURIComponent(orderNumber)}`),
+  track: (orderNumber, phone) =>
+    request(
+      `/orders/track/${encodeURIComponent(orderNumber)}?phone=${encodeURIComponent(phone)}`,
+    ),
   list: (status) =>
     request(`/orders${status ? `?status=${encodeURIComponent(status)}` : ""}`, {
       auth: true,

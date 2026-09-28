@@ -78,6 +78,7 @@ function StatusTimeline({ statusHistory, currentStatus }) {
 
 export default function TrackOrder() {
   const [orderNumber, setOrderNumber] = useState("");
+  const [phone, setPhone] = useState("");
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(false);
   const [notFound, setNotFound] = useState(false);
@@ -85,8 +86,9 @@ export default function TrackOrder() {
 
   async function handleSubmit(e) {
     e.preventDefault();
-    const trimmed = orderNumber.trim();
-    if (!trimmed) return;
+    const trimmed = orderNumber.trim().toUpperCase();
+    const trimmedPhone = phone.trim();
+    if (!trimmed || !trimmedPhone) return;
 
     setLoading(true);
     setNotFound(false);
@@ -94,10 +96,11 @@ export default function TrackOrder() {
     setOrder(null);
 
     try {
-      const data = await ordersApi.track(trimmed);
+      const data = await ordersApi.track(trimmed, trimmedPhone);
       setOrder(data);
     } catch (err) {
-      if (err.message?.includes("404") || /not found/i.test(err.message)) {
+      // Backend returns "No order found" for both unknown number and wrong phone.
+      if (/no order found|not found/i.test(err.message || "")) {
         setNotFound(true);
       } else {
         setError(err.message);
@@ -117,34 +120,45 @@ export default function TrackOrder() {
       </h1>
       <p className="text-stone text-sm sm:text-base leading-relaxed mb-8">
         Enter the order number you received at checkout, e.g.{" "}
-        <span className="font-mono">ORD-0001</span>.
+        <span className="font-mono">MS-7K3FQ9XD2M</span>, and the phone number
+        you ordered with.
       </p>
 
-      <form
-        onSubmit={handleSubmit}
-        className="flex flex-col sm:flex-row gap-3 mb-10"
-      >
+      <form onSubmit={handleSubmit} className="flex flex-col gap-3 mb-10">
         <input
           type="text"
           value={orderNumber}
           onChange={(e) => setOrderNumber(e.target.value)}
-          placeholder="ORD-0001"
-          className="flex-1 border border-stone-line bg-paper px-4 py-3 text-sm font-mono"
+          placeholder="MS-XXXXXXXXXX"
+          className="border border-stone-line bg-paper px-4 py-3 text-sm font-mono"
           aria-label="Order number"
+          autoComplete="off"
         />
-        <button
-          type="submit"
-          disabled={loading || !orderNumber.trim()}
-          className="px-6 py-3 bg-ink text-paper font-mono text-xs uppercase tracking-stamp hover:bg-oxblood transition-colors disabled:opacity-50 whitespace-nowrap"
-        >
-          {loading ? "Searching…" : "Track order"}
-        </button>
+        <div className="flex flex-col sm:flex-row gap-3">
+          <input
+            type="tel"
+            value={phone}
+            onChange={(e) => setPhone(e.target.value)}
+            placeholder="Phone used at checkout"
+            className="flex-1 border border-stone-line bg-paper px-4 py-3 text-sm font-mono"
+            aria-label="Phone number"
+            autoComplete="tel"
+          />
+          <button
+            type="submit"
+            disabled={loading || !orderNumber.trim() || !phone.trim()}
+            className="px-6 py-3 bg-ink text-paper font-mono text-xs uppercase tracking-stamp hover:bg-oxblood transition-colors disabled:opacity-50 whitespace-nowrap"
+          >
+            {loading ? "Searching…" : "Track order"}
+          </button>
+        </div>
       </form>
 
       {notFound && (
         <div className="border border-stone-line px-4 py-6 text-center">
           <p className="text-stone text-sm">
-            No order found with that number. Double-check it and try again.
+            No order found. Check the order number and phone number and try
+            again.
           </p>
         </div>
       )}

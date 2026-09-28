@@ -1,17 +1,21 @@
+const crypto = require("crypto");
 const mongoose = require("mongoose");
 const Order = require("../models/Order");
 const Product = require("../models/Product");
-const Counter = require("../models/Counter");
 
-// Atomically get the next order number, e.g. "ORD-0001".
-async function getNextOrderNumber() {
-  const counter = await Counter.findOneAndUpdate(
-    { name: "orderNumber" },
-    { $inc: { seq: 1 } },
-    { new: true, upsert: true },
-  );
-  return `ORD-${String(counter.seq).padStart(4, "0")}`;
+// No 0/O/1/I so codes are easy to read out over the phone.
+const ALPHABET = "23456789ABCDEFGHJKLMNPQRSTUVWXYZ";
+
+// Random, non-enumerable order number, e.g. "MS-7K3FQ9XD2M".
+function generateOrderNumber() {
+  let code = "";
+  for (let i = 0; i < 10; i++) {
+    code += ALPHABET[crypto.randomInt(ALPHABET.length)];
+  }
+  return `MS-${code}`;
 }
+
+const normalizePhone = (p) => String(p || "").replace(/\D/g, "");
 
 // POST /api/orders
 // Public: customer places an order from their cart.
@@ -77,23 +81,33 @@ async function createOrder(req, res, next) {
       total += product.price * quantity;
     }
 
-    const orderNumber = await getNextOrderNumber();
+    // Retry on the (very unlikely) duplicate orderNumber.
+    // Requires `unique: true` on orderNumber in the Order schema.
+    const MAX_ATTEMPTS = 5;
+    let order;
+    for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+      order = new Order({
+        orderNumber: generateOrderNumber(),
+        customer: {
+          firstName,
+          lastName,
+          phone,
+          city,
+          address,
+          notes: customer.notes || "",
+        },
+        items: orderItems,
+        total,
+      });
+      try {
+        await order.save();
+        break;
+      } catch (err) {
+        if (err.code === 11000 && attempt < MAX_ATTEMPTS) continue;
+        throw err;
+      }
+    }
 
-    const order = new Order({
-      orderNumber,
-      customer: {
-        firstName,
-        lastName,
-        phone,
-        city,
-        address,
-        notes: customer.notes || "",
-      },
-      items: orderItems,
-      total,
-    });
-
-    await order.save();
     res.status(201).json(order);
   } catch (err) {
     if (err.name === "ValidationError") {
@@ -164,18 +178,20 @@ async function updateOrderStatus(req, res, next) {
   }
 }
 
-// GET /api/orders/track/:orderNumber
-// Public: customer looks up their own order by order number only.
-// Deliberately returns a slimmer shape — no internal DB id needed by the
-// customer, no way to browse/enumerate other orders.
+// GET /api/orders/track/:orderNumber?phone=...
+// Public: customer looks up their own order. Requires order number AND the
+// phone used at checkout. Same 404 for "not found" and "wrong phone" so
+// nothing leaks about which order numbers exist.
 async function trackOrder(req, res, next) {
   try {
     const { orderNumber } = req.params;
+    const phone = normalizePhone(req.query.phone);
+
     const order = await Order.findOne({ orderNumber });
-    if (!order) {
-      return res
-        .status(404)
-        .json({ error: "No order found with that order number" });
+    const stored = order ? normalizePhone(order.customer.phone) : "";
+
+    if (!order || !phone || stored !== phone) {
+      return res.status(404).json({ error: "No order found" });
     }
 
     res.json({
