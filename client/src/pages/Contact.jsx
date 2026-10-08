@@ -7,7 +7,7 @@ const socials = [
   { label: "Facebook", href: "https://facebook.com/kepuceearte" },
 ];
 
-const SHOP_WHATSAPP = "355698167273"; // country code + number, no + or spaces
+const SHOP_WHATSAPP = "355692032381"; // country code + number, no + or spaces
 
 function buildWhatsAppLink(form) {
   const lines = [
@@ -40,7 +40,7 @@ function InfoBlock() {
         </div>
         <div>
           <dt className="stamp text-ink mb-1">Address</dt>
-          <dd className="text-stone">Vlore, Albania</dd>
+          <dd className="text-stone">Lagja Pavaresia, Vlorë, Albania</dd>
         </div>
         <div>
           <dt className="stamp text-ink mb-1">Hours</dt>
@@ -63,10 +63,10 @@ function InfoBlock() {
           <dt className="stamp text-ink mb-1">Phone</dt>
           <dd className="text-stone">
             <a
-              href="tel:+355698167273"
+              href="tel:+355692032381"
               className="hover:text-oxblood transition-colors"
             >
-              +355 69 81 67 273
+              +355 69 203 2381
             </a>
           </dd>
         </div>

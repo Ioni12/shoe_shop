@@ -11,18 +11,22 @@ export default function Footer() {
             Këpucë e Artë
           </div>
           <p className="text-stone leading-relaxed text-xs sm:text-sm">
-            Shoes built to be worn, not admired from a shelf. Rruga Myslym Shyri
-            49, Tirana.
+            Shoes built to be worn, not admired from a shelf. Lagja Pavaresia,
+            Vlorë.
           </p>
           <p className="text-stone text-xs sm:text-sm mt-2">
-            Pay on delivery, Tirana &amp; nationwide.
+            Pay on delivery, Vlorë &amp; nationwide.
           </p>
         </div>
         <div>
           <div className="stamp text-ink mb-2 sm:mb-3">Visit</div>
           <ul className="space-y-1 text-stone text-xs sm:text-sm">
             <li>Mon–Sat, 10:00–19:00</li>
-            <li>+355 69 123 4567</li>
+            <li>
+              <a href="tel:+355692032381" className="hover:text-oxblood">
+                +355 69 203 2381
+              </a>
+            </li>
             <li className="break-all">hello@kepuceearte.al</li>
           </ul>
         </div>
