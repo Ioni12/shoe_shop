@@ -1,4 +1,5 @@
 import { useMemo, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import ProductCard from "./ProductCard";
 
 const MAX_PRODUCTS = 10;
@@ -8,6 +9,7 @@ function shuffle(items) {
 }
 
 export default function FeaturedProducts({ products }) {
+  const { t } = useTranslation();
   const [dragging, setDragging] = useState(false);
   const trackRef = useRef(null);
   const dragStart = useRef(null);
@@ -17,7 +19,7 @@ export default function FeaturedProducts({ products }) {
     [products],
   );
 
-  if (featured.length === 0) return <p className="text-stone">Coming soon.</p>;
+  if (featured.length === 0) return <p className="text-stone">{t("home.comingSoon")}</p>;
 
   const move = (direction) => {
     trackRef.current?.scrollBy({ left: direction * 280, behavior: "smooth" });
@@ -51,7 +53,7 @@ export default function FeaturedProducts({ products }) {
       className="relative"
       role="region"
       aria-roledescription="carousel"
-      aria-label="Featured products"
+      aria-label={t("productDetail.featuredPairs")}
     >
       <div
         ref={trackRef}
@@ -84,7 +86,12 @@ export default function FeaturedProducts({ products }) {
       </div>
 
       <p className="mt-4 font-mono text-[10px] uppercase tracking-stamp text-stone">
-        {featured.length} featured {featured.length === 1 ? "pair" : "pairs"}
+        {t(
+          featured.length === 1
+            ? "productDetail.featured_one"
+            : "productDetail.featured_other",
+          { count: featured.length },
+        )}
       </p>
     </div>
   );

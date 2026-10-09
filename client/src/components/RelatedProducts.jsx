@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { products as productsApi } from "../api/client";
 import ProductCard from "./ProductCard";
 
 const TARGET_COUNT = 4;
 
 export default function RelatedProducts({ currentProductId, category }) {
+  const { t } = useTranslation();
   const [related, setRelated] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -53,7 +55,7 @@ export default function RelatedProducts({ currentProductId, category }) {
   return (
     <section className="mx-auto max-w-6xl px-5 md:px-8 py-16 md:py-24 border-t border-stone-line">
       <h2 className="font-display text-2xl md:text-3xl mb-10">
-        You might also like
+        {t("productDetail.youMightAlsoLike")}
       </h2>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-x-6 gap-y-12">
         {related.map((p) => (

@@ -1,8 +1,11 @@
+import { useTranslation } from "react-i18next";
 import CategoryPicker from "../../components/admin/CategoryPicker";
 
 export default function ProductBasicFields({
-  name,
-  setName,
+  nameSq,
+  setNameSq,
+  nameEn,
+  setNameEn,
   category,
   setCategory,
   price,
@@ -10,20 +13,37 @@ export default function ProductBasicFields({
   isActive,
   setIsActive,
 }) {
+  const { t } = useTranslation();
+
   return (
     <div className="grid md:grid-cols-2 gap-5">
       <div>
         <label
-          htmlFor="product-name"
+          htmlFor="product-name-sq"
           className="stamp text-ink mb-2 inline-block"
         >
-          Name
+          {t("admin.productForm.nameSq")}
         </label>
         <input
-          id="product-name"
+          id="product-name-sq"
           required
-          value={name}
-          onChange={(e) => setName(e.target.value)}
+          value={nameSq}
+          onChange={(e) => setNameSq(e.target.value)}
+          className="w-full border border-stone-line bg-paper px-4 py-3 text-sm"
+        />
+      </div>
+
+      <div>
+        <label
+          htmlFor="product-name-en"
+          className="stamp text-ink mb-2 inline-block"
+        >
+          {t("admin.productForm.nameEn")}
+        </label>
+        <input
+          id="product-name-en"
+          value={nameEn}
+          onChange={(e) => setNameEn(e.target.value)}
           className="w-full border border-stone-line bg-paper px-4 py-3 text-sm"
         />
       </div>
@@ -33,7 +53,7 @@ export default function ProductBasicFields({
           htmlFor="product-price"
           className="stamp text-ink mb-2 inline-block"
         >
-          Price
+          {t("admin.productForm.price")}
         </label>
         <input
           id="product-price"
@@ -48,7 +68,9 @@ export default function ProductBasicFields({
       </div>
 
       <div className="md:col-span-2">
-        <label className="stamp text-ink mb-2 inline-block">Category</label>
+        <label className="stamp text-ink mb-2 inline-block">
+          {t("admin.productForm.category")}
+        </label>
         <CategoryPicker value={category} onChange={setCategory} />
       </div>
 
@@ -59,7 +81,7 @@ export default function ProductBasicFields({
             checked={isActive}
             onChange={(e) => setIsActive(e.target.checked)}
           />
-          Active (visible on public site)
+          {t("admin.productForm.activeLabel")}
         </label>
       </div>
     </div>

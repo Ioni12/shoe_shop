@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { reviews as reviewsApi } from "../../api/client";
 import Stamp from "../../components/Stamp";
 
@@ -18,6 +19,7 @@ function Stars({ value }) {
 }
 
 export default function ReviewsAdmin() {
+  const { t, i18n } = useTranslation();
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -37,9 +39,17 @@ export default function ReviewsAdmin() {
       .finally(() => setLoading(false));
   }
 
+  function resolveProductName(product) {
+    if (!product) return t("admin.reviews.deletedProduct");
+    if (typeof product.name === "object") {
+      return product.name?.[i18n.language] || product.name?.sq || "";
+    }
+    return product.name || "";
+  }
+
   async function handleDelete(review) {
     const confirmed = window.confirm(
-      `Delete this review by ${review.reviewerName}? This can't be undone.`,
+      t("admin.reviews.confirmDelete", { name: review.reviewerName }),
     );
     if (!confirmed) return;
 
@@ -48,7 +58,14 @@ export default function ReviewsAdmin() {
       await reviewsApi.remove(review._id);
       setReviews((prev) => prev.filter((r) => r._id !== review._id));
     } catch (err) {
-      alert(`Couldn't delete review: ${err.message}`);
+      const code = err.code;
+      alert(
+        t("admin.reviews.deleteError", {
+          error: code
+            ? t(`errors.${code}`, { defaultValue: err.message })
+            : err.message,
+        }),
+      );
     } finally {
       setDeletingId(null);
     }
@@ -56,14 +73,14 @@ export default function ReviewsAdmin() {
 
   return (
     <div className="mx-auto max-w-6xl px-5 md:px-8 py-10">
-      <h1 className="font-display text-2xl md:text-3xl mb-8">Reviews</h1>
+      <h1 className="font-display text-2xl md:text-3xl mb-8">{t("admin.reviews.title")}</h1>
 
-      {loading && <p className="text-stone">Loading…</p>}
+      {loading && <p className="text-stone">{t("admin.reviews.loading")}</p>}
       {!loading && error && (
-        <p className="text-oxblood">Couldn't load reviews: {error}</p>
+        <p className="text-oxblood">{t("admin.reviews.errorLoading", { error })}</p>
       )}
       {!loading && !error && reviews.length === 0 && (
-        <p className="text-stone">No reviews yet.</p>
+        <p className="text-stone">{t("admin.reviews.noReviews")}</p>
       )}
 
       {!loading && !error && reviews.length > 0 && (
@@ -83,7 +100,7 @@ export default function ReviewsAdmin() {
                   />
                 )}
                 <span className="text-sm truncate">
-                  {r.product?.name ?? "Deleted product"}
+                  {resolveProductName(r.product)}
                 </span>
               </div>
 
@@ -93,7 +110,9 @@ export default function ReviewsAdmin() {
                   <span className="text-sm font-medium">{r.reviewerName}</span>
                   <Stars value={r.rating} />
                   <span className="text-xs text-stone font-mono">
-                    {new Date(r.createdAt).toLocaleDateString()}
+                    {new Intl.DateTimeFormat(i18n.language, { dateStyle: "medium" }).format(
+                      new Date(r.createdAt),
+                    )}
                   </span>
                 </div>
                 {r.comment && <p className="text-sm text-stone">{r.comment}</p>}
@@ -106,7 +125,9 @@ export default function ReviewsAdmin() {
                   disabled={deletingId === r._id}
                   className="font-mono text-xs uppercase tracking-stamp text-oxblood hover:opacity-70 disabled:opacity-40"
                 >
-                  {deletingId === r._id ? "Deleting…" : "Delete"}
+                  {deletingId === r._id
+                    ? t("admin.reviews.deleting")
+                    : t("admin.reviews.delete")}
                 </button>
               </div>
             </div>

@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { products as productsApi } from "../../api/client";
 import { getImageUrl } from "../../lib/format";
 
@@ -14,10 +15,11 @@ export default function ProductImagesEditor({
   newImageFiles,
   setNewImageFiles,
 }) {
+  const { t } = useTranslation();
   const [previews, setPreviews] = useState([]); // [{ file, url }]
   const [dragActive, setDragActive] = useState(false);
   const [validationError, setValidationError] = useState(null);
-  const [removingImage, setRemovingImage] = useState(null); // imagePath currently deleting
+  const [removingImage, setRemovingImage] = useState(null);
   const [removeError, setRemoveError] = useState(null);
   const inputRef = useRef(null);
 
@@ -58,12 +60,16 @@ export default function ProductImagesEditor({
 
     if (rejected.length > 0 || overflowCount > 0) {
       const parts = [];
-      if (rejected.length > 0) parts.push(`Skipped: ${rejected.join(", ")}.`);
+      if (rejected.length > 0)
+        parts.push(t("admin.productForm.imageAddError", { skipped: rejected.join(", "), overflow: "" }));
       if (overflowCount > 0) {
         parts.push(
-          `Only ${MAX_TOTAL} images allowed total — ${overflowCount} file${
-            overflowCount === 1 ? "" : "s"
-          } not added.`,
+          t(
+            overflowCount === 1
+              ? "admin.productForm.imageOverflow_one"
+              : "admin.productForm.imageOverflow_other",
+            { max: MAX_TOTAL, count: overflowCount },
+          ),
         );
       }
       setValidationError(parts.join(" "));
@@ -76,7 +82,7 @@ export default function ProductImagesEditor({
 
   function handleInputChange(e) {
     if (e.target.files?.length) validateAndAdd(e.target.files);
-    e.target.value = ""; // allow re-selecting the same file later
+    e.target.value = "";
   }
 
   function handleDrop(e) {
@@ -93,19 +99,20 @@ export default function ProductImagesEditor({
     setRemoveError(null);
 
     if (existingImages.length <= 1) {
-      setRemoveError(
-        "A product must keep at least one image — add a replacement first.",
-      );
+      setRemoveError(t("admin.productForm.removeExistingError"));
       return;
     }
-    if (!productId) return; // shouldn't happen (create mode has no existing images)
+    if (!productId) return;
 
     setRemovingImage(imagePath);
     try {
       const updated = await productsApi.removeImage(productId, imagePath);
       setExistingImages(updated.images || []);
     } catch (err) {
-      setRemoveError(err.message);
+      const code = err.code;
+      setRemoveError(
+        code ? t(`errors.${code}`, { defaultValue: err.message }) : err.message,
+      );
     } finally {
       setRemovingImage(null);
     }
@@ -115,14 +122,14 @@ export default function ProductImagesEditor({
 
   return (
     <div>
-      <div className="stamp text-ink mb-3">Images</div>
+      <div className="stamp text-ink mb-3">{t("admin.productForm.images")}</div>
 
       {existingImages.length > 0 && (
         <div className="mb-4">
           <p className="text-xs text-stone mb-2">
-            Current images
-            {existingImages.length === 1 &&
-              " — add a replacement before removing the last one."}
+            {existingImages.length === 1
+              ? t("admin.productForm.currentImagesSingle")
+              : t("admin.productForm.currentImages")}
           </p>
           <div className="flex gap-3 flex-wrap">
             {existingImages.map((img) => (
@@ -139,11 +146,11 @@ export default function ProductImagesEditor({
                   type="button"
                   onClick={() => handleRemoveExisting(img)}
                   disabled={removingImage === img || existingImages.length <= 1}
-                  aria-label="Remove image"
+                  aria-label={t("admin.productForm.removeImage")}
                   title={
                     existingImages.length <= 1
-                      ? "Add a replacement image before removing the last one"
-                      : "Remove image"
+                      ? t("admin.productForm.addReplacement")
+                      : t("admin.productForm.removeImage")
                   }
                   className="absolute top-0.5 right-0.5 w-5 h-5 flex items-center justify-center bg-ink/80 text-paper text-xs hover:bg-oxblood transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                 >
@@ -170,7 +177,7 @@ export default function ProductImagesEditor({
               <button
                 type="button"
                 onClick={() => removeNewFile(i)}
-                aria-label={`Remove ${p.file.name}`}
+                aria-label={t("admin.productForm.removeNewImage", { name: p.file.name })}
                 className="absolute top-0.5 right-0.5 w-5 h-5 flex items-center justify-center bg-ink/80 text-paper text-xs hover:bg-oxblood transition-colors"
               >
                 ×
@@ -212,21 +219,27 @@ export default function ProductImagesEditor({
           onChange={handleInputChange}
           disabled={isFull}
           className="hidden"
-          aria-label="Add product images"
+          aria-label={t("admin.productForm.addImages")}
         />
         {isFull ? (
           <p className="text-sm text-stone">
-            Maximum of {MAX_TOTAL} images reached.
+            {t("admin.productForm.maxImagesReached", { max: MAX_TOTAL })}
           </p>
         ) : (
           <>
             <p className="text-sm">
-              Drag images here, or{" "}
-              <span className="text-oxblood underline">click to browse</span>
+              {t("admin.productForm.dropZoneText")}{" "}
+              <span className="text-oxblood underline">
+                {t("admin.productForm.dropZoneClick")}
+              </span>
             </p>
             <p className="text-xs text-stone mt-1">
-              {remainingSlots} slot{remainingSlots === 1 ? "" : "s"} left · JPG,
-              PNG, or WebP · 5MB max each
+              {t(
+                remainingSlots === 1
+                  ? "admin.productForm.dropZoneSlots_one"
+                  : "admin.productForm.dropZoneSlots_other",
+                { count: remainingSlots },
+              )}
             </p>
           </>
         )}

@@ -19,29 +19,34 @@ const normalizePhone = (p) => String(p || "").replace(/\D/g, "");
 
 // POST /api/orders
 // Public: customer places an order from their cart.
-// Body: { customer: {...}, items: [{ productId, variant, quantity }] }
+// Body: { customer: {...}, items: [{ productId, variant, quantity }], lang: "sq"|"en" }
 async function createOrder(req, res, next) {
   try {
-    const { customer, items } = req.body;
+    const { customer, items, lang } = req.body;
 
     if (!customer) {
-      return res
-        .status(400)
-        .json({ error: "Customer information is required" });
+      return res.status(400).json({
+        code: "customerRequired",
+        message: "Customer information is required",
+      });
     }
     const { firstName, lastName, phone, city, address } = customer;
     if (!firstName || !lastName || !phone || !city || !address) {
       return res.status(400).json({
-        error:
-          "Customer firstName, lastName, phone, city, and address are required",
+        code: "customerFieldsRequired",
+        message: "Customer firstName, lastName, phone, city, and address are required",
       });
     }
 
     if (!Array.isArray(items) || items.length === 0) {
-      return res
-        .status(400)
-        .json({ error: "Order must contain at least one item" });
+      return res.status(400).json({
+        code: "orderItemsRequired",
+        message: "Order must contain at least one item",
+      });
     }
+
+    // Validate and normalise lang — fall back to "sq"
+    const orderLang = lang === "en" ? "en" : "sq";
 
     // Rebuild each line item from the DB — never trust price/name sent by the client.
     const orderItems = [];
@@ -49,27 +54,36 @@ async function createOrder(req, res, next) {
 
     for (const line of items) {
       if (!line.productId || !mongoose.isValidObjectId(line.productId)) {
-        return res
-          .status(400)
-          .json({ error: `Invalid productId: ${line.productId}` });
+        return res.status(400).json({
+          code: "itemProductIdInvalid",
+          message: `Invalid productId: ${line.productId}`,
+        });
       }
       const quantity = Number(line.quantity) || 0;
       if (quantity < 1) {
-        return res
-          .status(400)
-          .json({ error: "Item quantity must be at least 1" });
+        return res.status(400).json({
+          code: "itemQtyInvalid",
+          message: "Item quantity must be at least 1",
+        });
       }
 
       const product = await Product.findById(line.productId);
       if (!product || !product.isActive) {
-        return res
-          .status(400)
-          .json({ error: `Product not available: ${line.productId}` });
+        return res.status(400).json({
+          code: "productNotAvailable",
+          message: `Product not available: ${line.productId}`,
+        });
       }
+
+      // Snapshot name as {sq, en} object
+      const nameSq =
+        typeof product.name === "object" ? product.name.sq || "" : product.name || "";
+      const nameEn =
+        typeof product.name === "object" ? product.name.en || "" : "";
 
       orderItems.push({
         product: product._id,
-        name: product.name,
+        name: { sq: nameSq, en: nameEn },
         price: product.price,
         variant: {
           size: line.variant?.size || undefined,
@@ -82,7 +96,6 @@ async function createOrder(req, res, next) {
     }
 
     // Retry on the (very unlikely) duplicate orderNumber.
-    // Requires `unique: true` on orderNumber in the Order schema.
     const MAX_ATTEMPTS = 5;
     let order;
     for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
@@ -98,6 +111,7 @@ async function createOrder(req, res, next) {
         },
         items: orderItems,
         total,
+        lang: orderLang,
       });
       try {
         await order.save();
@@ -111,7 +125,10 @@ async function createOrder(req, res, next) {
     res.status(201).json(order);
   } catch (err) {
     if (err.name === "ValidationError") {
-      return res.status(400).json({ error: err.message });
+      return res.status(400).json({
+        code: "validationError",
+        message: err.message,
+      });
     }
     next(err);
   }
@@ -138,12 +155,18 @@ async function getOrderById(req, res, next) {
   try {
     const order = await Order.findById(req.params.id);
     if (!order) {
-      return res.status(404).json({ error: "Order not found" });
+      return res.status(404).json({
+        code: "orderNotFound",
+        message: "Order not found",
+      });
     }
     res.json(order);
   } catch (err) {
     if (err.name === "CastError") {
-      return res.status(400).json({ error: "Invalid order id" });
+      return res.status(400).json({
+        code: "orderIdInvalid",
+        message: "Invalid order id",
+      });
     }
     next(err);
   }
@@ -156,13 +179,17 @@ async function updateOrderStatus(req, res, next) {
     const { status } = req.body;
     if (!Order.STATUSES.includes(status)) {
       return res.status(400).json({
-        error: `Invalid status. Must be one of: ${Order.STATUSES.join(", ")}`,
+        code: "invalidStatus",
+        message: `Invalid status. Must be one of: ${Order.STATUSES.join(", ")}`,
       });
     }
 
     const order = await Order.findById(req.params.id);
     if (!order) {
-      return res.status(404).json({ error: "Order not found" });
+      return res.status(404).json({
+        code: "orderNotFound",
+        message: "Order not found",
+      });
     }
 
     order.status = status;
@@ -172,16 +199,17 @@ async function updateOrderStatus(req, res, next) {
     res.json(order);
   } catch (err) {
     if (err.name === "CastError") {
-      return res.status(400).json({ error: "Invalid order id" });
+      return res.status(400).json({
+        code: "orderIdInvalid",
+        message: "Invalid order id",
+      });
     }
     next(err);
   }
 }
 
 // GET /api/orders/track/:orderNumber?phone=...
-// Public: customer looks up their own order. Requires order number AND the
-// phone used at checkout. Same 404 for "not found" and "wrong phone" so
-// nothing leaks about which order numbers exist.
+// Public: customer looks up their own order.
 async function trackOrder(req, res, next) {
   try {
     const { orderNumber } = req.params;
@@ -191,7 +219,10 @@ async function trackOrder(req, res, next) {
     const stored = order ? normalizePhone(order.customer.phone) : "";
 
     if (!order || !phone || stored !== phone) {
-      return res.status(404).json({ error: "No order found" });
+      return res.status(404).json({
+        code: "noOrderFound",
+        message: "No order found",
+      });
     }
 
     res.json({

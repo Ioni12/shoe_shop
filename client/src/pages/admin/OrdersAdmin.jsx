@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { orders as ordersApi } from "../../api/client";
 import { formatPrice } from "../../lib/format";
 import Stamp from "../../components/Stamp";
@@ -7,6 +8,7 @@ import Stamp from "../../components/Stamp";
 const STATUSES = ["New", "Confirmed", "In Delivery", "Delivered", "Cancelled"];
 
 export default function OrdersAdmin() {
+  const { t, i18n } = useTranslation();
   const [orders, setOrders] = useState([]);
   const [statusFilter, setStatusFilter] = useState("");
   const [loading, setLoading] = useState(true);
@@ -25,27 +27,27 @@ export default function OrdersAdmin() {
   return (
     <div className="mx-auto max-w-6xl px-5 md:px-8 py-10">
       <div className="flex items-center justify-between mb-8">
-        <h1 className="font-display text-2xl md:text-3xl">Orders</h1>
+        <h1 className="font-display text-2xl md:text-3xl">{t("admin.orders.title")}</h1>
         <select
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
           className="border border-stone-line bg-paper px-4 py-2 text-sm font-mono"
         >
-          <option value="">All statuses</option>
+          <option value="">{t("admin.orders.allStatuses")}</option>
           {STATUSES.map((s) => (
             <option key={s} value={s}>
-              {s}
+              {t(`orderStatus.${s}`)}
             </option>
           ))}
         </select>
       </div>
 
-      {loading && <p className="text-stone">Loading…</p>}
+      {loading && <p className="text-stone">{t("admin.orders.loading")}</p>}
       {!loading && error && (
-        <p className="text-oxblood">Couldn't load orders: {error}</p>
+        <p className="text-oxblood">{t("admin.orders.errorLoading", { error })}</p>
       )}
       {!loading && !error && orders.length === 0 && (
-        <p className="text-stone">No orders found.</p>
+        <p className="text-stone">{t("admin.orders.noOrders")}</p>
       )}
 
       {!loading && !error && orders.length > 0 && (
@@ -60,7 +62,7 @@ export default function OrdersAdmin() {
               <div className="flex items-center justify-between md:hidden">
                 <span className="font-mono text-sm">{o.orderNumber}</span>
                 <Stamp tone={o.status === "Cancelled" ? "stone" : "ink"}>
-                  {o.status}
+                  {t(`orderStatus.${o.status}`)}
                 </Stamp>
               </div>
 
@@ -70,14 +72,16 @@ export default function OrdersAdmin() {
                   {o.customer?.firstName} {o.customer?.lastName}
                 </span>
                 <span className="text-xs text-stone font-mono whitespace-nowrap">
-                  {new Date(o.createdAt).toLocaleDateString()}
+                  {new Intl.DateTimeFormat(i18n.language, { dateStyle: "short" }).format(
+                    new Date(o.createdAt),
+                  )}
                 </span>
                 <span className="font-mono text-sm whitespace-nowrap">
-                  {formatPrice(o.total)}
+                  {formatPrice(o.total, i18n.language)}
                 </span>
               </div>
 
-              {/* Desktop row (unchanged) */}
+              {/* Desktop row */}
               <span className="hidden md:inline font-mono text-sm w-28">
                 {o.orderNumber}
               </span>
@@ -85,14 +89,16 @@ export default function OrdersAdmin() {
                 {o.customer?.firstName} {o.customer?.lastName}
               </span>
               <span className="hidden md:inline text-xs text-stone font-mono w-32">
-                {new Date(o.createdAt).toLocaleDateString()}
+                {new Intl.DateTimeFormat(i18n.language, { dateStyle: "medium" }).format(
+                  new Date(o.createdAt),
+                )}
               </span>
               <span className="hidden md:inline font-mono text-sm w-24 text-right">
-                {formatPrice(o.total)}
+                {formatPrice(o.total, i18n.language)}
               </span>
               <span className="hidden md:flex w-32 justify-end">
                 <Stamp tone={o.status === "Cancelled" ? "stone" : "ink"}>
-                  {o.status}
+                  {t(`orderStatus.${o.status}`)}
                 </Stamp>
               </span>
             </Link>

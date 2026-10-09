@@ -1,4 +1,8 @@
+import { useTranslation } from "react-i18next";
+
 export default function ProductFeaturesEditor({ features, setFeatures }) {
+  const { t } = useTranslation();
+
   function updateFeature(i, value) {
     setFeatures((prev) => prev.map((f, idx) => (idx === i ? value : f)));
   }
@@ -11,7 +15,7 @@ export default function ProductFeaturesEditor({ features, setFeatures }) {
 
   return (
     <div>
-      <div className="stamp text-ink mb-3">Features</div>
+      <div className="stamp text-ink mb-3">{t("admin.productForm.features")}</div>
       <div className="space-y-2">
         {features.map((f, i) => (
           <div key={i} className="flex gap-2">
@@ -19,16 +23,16 @@ export default function ProductFeaturesEditor({ features, setFeatures }) {
               value={f}
               onChange={(e) => updateFeature(i, e.target.value)}
               className="flex-1 border border-stone-line bg-paper px-4 py-2 text-sm"
-              placeholder="e.g. Leather upper"
-              aria-label={`Feature ${i + 1}`}
+              placeholder={t("admin.productForm.featurePlaceholder")}
+              aria-label={t("admin.productForm.featureLabel", { n: i + 1 })}
             />
             <button
               type="button"
               onClick={() => removeFeature(i)}
               className="px-3 text-stone hover:text-oxblood text-sm"
-              aria-label={`Remove feature ${i + 1}`}
+              aria-label={t("admin.productForm.removeFeature", { n: i + 1 })}
             >
-              Remove
+              {t("common.remove")}
             </button>
           </div>
         ))}
@@ -38,7 +42,7 @@ export default function ProductFeaturesEditor({ features, setFeatures }) {
         onClick={addFeature}
         className="mt-3 font-mono text-xs uppercase tracking-stamp hover:text-oxblood"
       >
-        + Add feature
+        {t("admin.productForm.addFeature")}
       </button>
     </div>
   );

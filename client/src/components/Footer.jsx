@@ -1,6 +1,8 @@
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 export default function Footer() {
+  const { t } = useTranslation();
   const year = new Date().getFullYear();
 
   return (
@@ -11,17 +13,16 @@ export default function Footer() {
             Këpucë e Artë
           </div>
           <p className="text-stone leading-relaxed text-xs sm:text-sm">
-            Shoes built to be worn, not admired from a shelf. Lagja Pavaresia,
-            Vlorë.
+            {t("footer.tagline")}
           </p>
           <p className="text-stone text-xs sm:text-sm mt-2">
-            Pay on delivery, Vlorë &amp; nationwide.
+            {t("footer.payOnDelivery")}
           </p>
         </div>
         <div>
-          <div className="stamp text-ink mb-2 sm:mb-3">Visit</div>
+          <div className="stamp text-ink mb-2 sm:mb-3">{t("footer.visitHeading")}</div>
           <ul className="space-y-1 text-stone text-xs sm:text-sm">
-            <li>Mon–Sat, 10:00–19:00</li>
+            <li>{t("footer.hours")}</li>
             <li>
               <a href="tel:+355692032381" className="hover:text-oxblood">
                 +355 69 203 2381
@@ -31,26 +32,26 @@ export default function Footer() {
           </ul>
         </div>
         <div>
-          <div className="stamp text-ink mb-2 sm:mb-3">Shop</div>
+          <div className="stamp text-ink mb-2 sm:mb-3">{t("footer.shopHeading")}</div>
           <ul className="space-y-1 text-stone text-xs sm:text-sm">
             <li>
               <Link to="/products" className="hover:text-oxblood">
-                All products
+                {t("footer.allProducts")}
               </Link>
             </li>
             <li>
               <Link to="/track-order" className="hover:text-oxblood">
-                Track order
+                {t("footer.trackOrder")}
               </Link>
             </li>
             <li>
               <Link to="/contact" className="hover:text-oxblood">
-                Contact
+                {t("footer.contact")}
               </Link>
             </li>
             <li>
               <Link to="/admin/login" className="hover:text-oxblood">
-                Admin
+                {t("footer.admin")}
               </Link>
             </li>
           </ul>
@@ -58,7 +59,7 @@ export default function Footer() {
       </div>
       <div className="stitch">
         <div className="mx-auto max-w-6xl px-5 sm:px-6 md:px-8 py-3 sm:py-4 text-[10px] sm:text-[11px] font-mono uppercase tracking-stamp text-stone text-center">
-          © {year} Këpucë e Artë™. All rights reserved.
+          © {year} Këpucë e Artë™. {t("common.allRightsReserved")}
         </div>
       </div>
     </footer>

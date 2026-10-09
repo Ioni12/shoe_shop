@@ -33,23 +33,36 @@ async function getProductById(req, res, next) {
   try {
     const product = await Product.findById(req.params.id);
     if (!product) {
-      return res.status(404).json({ error: "Product not found" });
+      return res.status(404).json({
+        code: "productNotFound",
+        message: "Product not found",
+      });
     }
     res.json(product);
   } catch (err) {
     if (err.name === "CastError") {
-      return res.status(400).json({ error: "Invalid product id" });
+      return res.status(400).json({
+        code: "productIdInvalid",
+        message: "Invalid product id",
+      });
     }
     next(err);
   }
 }
 
 // POST /api/products
-// Admin only (route will be protected in Phase 5). Expects multipart/form-data
-// with text fields + optional "images" files.
+// Admin only. Expects multipart/form-data with text fields + optional "images" files.
+// name and description arrive as JSON strings: '{"sq":"...","en":"..."}'
 async function createProduct(req, res, next) {
   try {
-    const { name, description, price, category, features, variants } = req.body;
+    const { price, category, features, variants } = req.body;
+
+    // name and description can arrive as JSON strings {"sq":"...","en":"..."} or plain strings
+    let name = req.body.name;
+    let description = req.body.description;
+
+    try { name = JSON.parse(name); } catch { name = { sq: name || "", en: "" }; }
+    try { description = JSON.parse(description); } catch { description = { sq: description || "", en: "" }; }
 
     const imagePaths = (req.files || []).map((f) => `/uploads/${f.filename}`);
 
@@ -58,7 +71,6 @@ async function createProduct(req, res, next) {
       description,
       price,
       category,
-      // features/variants may arrive as JSON strings from a multipart form
       features: features ? JSON.parse(features) : [],
       variants: variants ? JSON.parse(variants) : [],
       images: imagePaths,
@@ -68,7 +80,10 @@ async function createProduct(req, res, next) {
     res.status(201).json(product);
   } catch (err) {
     if (err.name === "ValidationError") {
-      return res.status(400).json({ error: err.message });
+      return res.status(400).json({
+        code: "validationError",
+        message: err.message,
+      });
     }
     next(err);
   }
@@ -78,16 +93,26 @@ async function createProduct(req, res, next) {
 // Admin only. Supports updating fields and optionally adding new images.
 async function updateProduct(req, res, next) {
   try {
-    const { name, description, price, category, features, variants, isActive } =
-      req.body;
+    const { price, category, features, variants, isActive } = req.body;
+
+    // name and description can arrive as JSON strings {"sq":"...","en":"..."} or plain strings
+    let name = req.body.name;
+    let description = req.body.description;
 
     const product = await Product.findById(req.params.id);
     if (!product) {
-      return res.status(404).json({ error: "Product not found" });
+      return res.status(404).json({
+        code: "productNotFound",
+        message: "Product not found",
+      });
     }
 
-    if (name !== undefined) product.name = name;
-    if (description !== undefined) product.description = description;
+    if (name !== undefined) {
+      try { product.name = JSON.parse(name); } catch { product.name = { sq: name, en: "" }; }
+    }
+    if (description !== undefined) {
+      try { product.description = JSON.parse(description); } catch { product.description = { sq: description, en: "" }; }
+    }
     if (price !== undefined) product.price = price;
     if (category !== undefined) product.category = category;
     if (features !== undefined) product.features = JSON.parse(features);
@@ -104,10 +129,16 @@ async function updateProduct(req, res, next) {
     res.json(product);
   } catch (err) {
     if (err.name === "ValidationError") {
-      return res.status(400).json({ error: err.message });
+      return res.status(400).json({
+        code: "validationError",
+        message: err.message,
+      });
     }
     if (err.name === "CastError") {
-      return res.status(400).json({ error: "Invalid product id" });
+      return res.status(400).json({
+        code: "productIdInvalid",
+        message: "Invalid product id",
+      });
     }
     next(err);
   }
@@ -119,12 +150,18 @@ async function deleteProduct(req, res, next) {
   try {
     const product = await Product.findByIdAndDelete(req.params.id);
     if (!product) {
-      return res.status(404).json({ error: "Product not found" });
+      return res.status(404).json({
+        code: "productNotFound",
+        message: "Product not found",
+      });
     }
     res.json({ message: "Product deleted", id: product._id });
   } catch (err) {
     if (err.name === "CastError") {
-      return res.status(400).json({ error: "Invalid product id" });
+      return res.status(400).json({
+        code: "productIdInvalid",
+        message: "Invalid product id",
+      });
     }
     next(err);
   }
@@ -132,29 +169,35 @@ async function deleteProduct(req, res, next) {
 
 // DELETE /api/products/:id/images
 // Admin only. Body: { imagePath: "/uploads/xxxx.jpg" }
-// Removes one image from the product's images array and deletes the file
-// from disk. Rejects if it would leave the product with zero images.
 async function removeProductImage(req, res, next) {
   try {
     const { imagePath } = req.body;
     if (!imagePath) {
-      return res.status(400).json({ error: "imagePath is required" });
+      return res.status(400).json({
+        code: "imagePathRequired",
+        message: "imagePath is required",
+      });
     }
 
     const product = await Product.findById(req.params.id);
     if (!product) {
-      return res.status(404).json({ error: "Product not found" });
+      return res.status(404).json({
+        code: "productNotFound",
+        message: "Product not found",
+      });
     }
 
     if (!product.images.includes(imagePath)) {
-      return res
-        .status(404)
-        .json({ error: "That image is not associated with this product" });
+      return res.status(404).json({
+        code: "imageNotOnProduct",
+        message: "That image is not associated with this product",
+      });
     }
 
     if (product.images.length === 1) {
       return res.status(400).json({
-        error:
+        code: "cannotRemoveLastImage",
+        message:
           "Cannot remove the last image — a product must have at least one image, upload a replacement first",
       });
     }
@@ -162,8 +205,7 @@ async function removeProductImage(req, res, next) {
     product.images = product.images.filter((img) => img !== imagePath);
     await product.save();
 
-    // Best-effort file cleanup — don't fail the request if this errors
-    // (e.g. file already missing), just log it.
+    // Best-effort file cleanup
     const filename = path.basename(imagePath);
     const filePath = path.join(__dirname, "..", "..", "uploads", filename);
     fs.unlink(filePath, (err) => {
@@ -178,7 +220,10 @@ async function removeProductImage(req, res, next) {
     res.json(product);
   } catch (err) {
     if (err.name === "CastError") {
-      return res.status(400).json({ error: "Invalid product id" });
+      return res.status(400).json({
+        code: "productIdInvalid",
+        message: "Invalid product id",
+      });
     }
     next(err);
   }

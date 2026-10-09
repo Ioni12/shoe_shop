@@ -10,7 +10,16 @@ function lineKey(productId, variant) {
 function loadCart() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    return raw ? JSON.parse(raw) : [];
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    // Migrate legacy items that stored name/image — keep only the fields we need
+    return parsed.map(({ productId, price, image, variant, quantity }) => ({
+      productId,
+      price,
+      image,
+      variant,
+      quantity,
+    }));
   } catch {
     return [];
   }
@@ -23,7 +32,9 @@ export function CartProvider({ children }) {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
   }, [items]);
 
-  function addItem({ productId, name, price, image, variant, quantity = 1 }) {
+  // addItem no longer stores name — callers must NOT pass name.
+  // price and image are kept as snapshots for display without a product fetch.
+  function addItem({ productId, price, image, variant, quantity = 1 }) {
     setItems((prev) => {
       const key = lineKey(productId, variant);
       const existing = prev.find(
@@ -36,7 +47,7 @@ export function CartProvider({ children }) {
             : i,
         );
       }
-      return [...prev, { productId, name, price, image, variant, quantity }];
+      return [...prev, { productId, price, image, variant, quantity }];
     });
   }
 

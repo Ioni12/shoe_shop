@@ -1,10 +1,12 @@
 import { useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { getImageUrl } from "../lib/format";
 
 const MIN_ZOOM = 1;
 const MAX_ZOOM = 3;
 
 export default function ImageLightbox({ images, startIndex, onClose }) {
+  const { t } = useTranslation();
   const [index, setIndex] = useState(startIndex);
   const [zoom, setZoom] = useState(1);
   const [pan, setPan] = useState({ x: 0, y: 0 });
@@ -146,14 +148,14 @@ export default function ImageLightbox({ images, startIndex, onClose }) {
       className="fixed inset-0 z-50 bg-ink/95 flex items-center justify-center"
       role="dialog"
       aria-modal="true"
-      aria-label="Image viewer"
+      aria-label={t("imageLightbox.viewerLabel")}
     >
       <button
         onClick={onClose}
         className="absolute top-5 right-5 text-paper font-mono text-xs uppercase tracking-stamp border border-paper px-4 py-2 hover:bg-paper hover:text-ink transition-colors"
-        aria-label="Close image viewer"
+        aria-label={t("imageLightbox.closeButton")}
       >
-        Close
+        {t("common.close")}
       </button>
 
       {images.length > 1 && (
@@ -161,14 +163,14 @@ export default function ImageLightbox({ images, startIndex, onClose }) {
           <button
             onClick={() => goTo(index - 1)}
             className="absolute left-3 md:left-8 top-1/2 -translate-y-1/2 text-paper w-11 h-11 flex items-center justify-center border border-paper hover:bg-paper hover:text-ink transition-colors text-xl"
-            aria-label="Previous image"
+            aria-label={t("imageLightbox.prevImage")}
           >
             ‹
           </button>
           <button
             onClick={() => goTo(index + 1)}
             className="absolute right-3 md:right-8 top-1/2 -translate-y-1/2 text-paper w-11 h-11 flex items-center justify-center border border-paper hover:bg-paper hover:text-ink transition-colors text-xl"
-            aria-label="Next image"
+            aria-label={t("imageLightbox.nextImage")}
           >
             ›
           </button>
@@ -204,8 +206,10 @@ export default function ImageLightbox({ images, startIndex, onClose }) {
       </div>
 
       <p className="absolute bottom-5 left-1/2 -translate-x-1/2 text-paper/70 font-mono text-[11px] uppercase tracking-stamp">
-        {images.length > 1 ? `${index + 1} / ${images.length} — ` : ""}
-        Scroll or pinch to zoom, drag to pan
+        {images.length > 1
+          ? `${t("imageLightbox.counter", { current: index + 1, total: images.length })} — `
+          : ""}
+        {t("imageLightbox.hint")}
       </p>
     </div>
   );

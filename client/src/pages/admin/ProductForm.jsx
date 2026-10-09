@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { products as productsApi } from "../../api/client";
 import ProductBasicFields from "./ProductBasicFields";
 import ProductFeaturesEditor from "./ProductFeaturesEditor";
@@ -10,9 +11,14 @@ export default function ProductForm() {
   const { id } = useParams();
   const isEdit = Boolean(id);
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
-  const [name, setName] = useState("");
-  const [description, setDescription] = useState("");
+  // Dual-language name and description
+  const [nameSq, setNameSq] = useState("");
+  const [nameEn, setNameEn] = useState("");
+  const [descriptionSq, setDescriptionSq] = useState("");
+  const [descriptionEn, setDescriptionEn] = useState("");
+
   const [price, setPrice] = useState("");
   const [category, setCategory] = useState("");
   const [isActive, setIsActive] = useState(true);
@@ -30,8 +36,23 @@ export default function ProductForm() {
     productsApi
       .get(id)
       .then((p) => {
-        setName(p.name || "");
-        setDescription(p.description || "");
+        // Handle legacy: name / description may still be a plain string
+        if (typeof p.name === "object") {
+          setNameSq(p.name?.sq || "");
+          setNameEn(p.name?.en || "");
+        } else {
+          setNameSq(p.name || "");
+          setNameEn("");
+        }
+
+        if (typeof p.description === "object") {
+          setDescriptionSq(p.description?.sq || "");
+          setDescriptionEn(p.description?.en || "");
+        } else {
+          setDescriptionSq(p.description || "");
+          setDescriptionEn("");
+        }
+
         setPrice(String(p.price ?? ""));
         setCategory(p.category || "");
         setIsActive(p.isActive !== false);
@@ -49,8 +70,12 @@ export default function ProductForm() {
     setError(null);
 
     const formData = new FormData();
-    formData.append("name", name);
-    formData.append("description", description);
+    // Submit as JSON objects for name and description
+    formData.append("name", JSON.stringify({ sq: nameSq, en: nameEn }));
+    formData.append(
+      "description",
+      JSON.stringify({ sq: descriptionSq, en: descriptionEn }),
+    );
     formData.append("price", price);
     formData.append("category", category);
     formData.append(
@@ -79,7 +104,10 @@ export default function ProductForm() {
       }
       navigate("/admin/products");
     } catch (err) {
-      setError(err.message);
+      const code = err.code;
+      setError(
+        code ? t(`errors.${code}`, { defaultValue: err.message }) : err.message,
+      );
       setSaving(false);
     }
   }
@@ -87,7 +115,7 @@ export default function ProductForm() {
   if (loading) {
     return (
       <div className="mx-auto max-w-3xl px-5 md:px-8 py-10">
-        <p className="text-stone">Loading…</p>
+        <p className="text-stone">{t("admin.productForm.loading")}</p>
       </div>
     );
   }
@@ -95,7 +123,7 @@ export default function ProductForm() {
   return (
     <div className="mx-auto max-w-3xl px-5 md:px-8 py-10">
       <h1 className="font-display text-2xl md:text-3xl mb-8">
-        {isEdit ? "Edit product" : "New product"}
+        {isEdit ? t("admin.productForm.titleEdit") : t("admin.productForm.titleNew")}
       </h1>
 
       {error && (
@@ -106,8 +134,10 @@ export default function ProductForm() {
 
       <form onSubmit={handleSubmit} className="space-y-8">
         <ProductBasicFields
-          name={name}
-          setName={setName}
+          nameSq={nameSq}
+          setNameSq={setNameSq}
+          nameEn={nameEn}
+          setNameEn={setNameEn}
           category={category}
           setCategory={setCategory}
           price={price}
@@ -116,19 +146,37 @@ export default function ProductForm() {
           setIsActive={setIsActive}
         />
 
+        {/* Description — Albanian (required) */}
         <div>
           <label
-            htmlFor="product-description"
+            htmlFor="product-description-sq"
             className="stamp text-ink mb-2 inline-block"
           >
-            Description
+            {t("admin.productForm.descriptionSq")}
           </label>
           <textarea
-            id="product-description"
+            id="product-description-sq"
             required
             rows={4}
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
+            value={descriptionSq}
+            onChange={(e) => setDescriptionSq(e.target.value)}
+            className="w-full border border-stone-line bg-paper px-4 py-3 text-sm resize-none"
+          />
+        </div>
+
+        {/* Description — English (optional) */}
+        <div>
+          <label
+            htmlFor="product-description-en"
+            className="stamp text-ink mb-2 inline-block"
+          >
+            {t("admin.productForm.descriptionEn")}
+          </label>
+          <textarea
+            id="product-description-en"
+            rows={4}
+            value={descriptionEn}
+            onChange={(e) => setDescriptionEn(e.target.value)}
             className="w-full border border-stone-line bg-paper px-4 py-3 text-sm resize-none"
           />
         </div>
@@ -151,14 +199,18 @@ export default function ProductForm() {
             disabled={saving}
             className="px-6 py-3 bg-ink text-paper font-mono text-xs uppercase tracking-stamp hover:bg-oxblood transition-colors disabled:opacity-50"
           >
-            {saving ? "Saving…" : isEdit ? "Save changes" : "Create product"}
+            {saving
+              ? t("admin.productForm.saving")
+              : isEdit
+                ? t("admin.productForm.saveChanges")
+                : t("admin.productForm.createProduct")}
           </button>
           <button
             type="button"
             onClick={() => navigate("/admin/products")}
             className="px-6 py-3 border border-stone-line font-mono text-xs uppercase tracking-stamp hover:border-ink transition-colors"
           >
-            Cancel
+            {t("admin.productForm.cancel")}
           </button>
         </div>
       </form>

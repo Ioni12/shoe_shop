@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import Stamp from "../components/Stamp";
 import FeaturedProducts from "../components/FeaturedProducts";
 import Directions from "../components/Directions";
@@ -11,48 +12,6 @@ const HERO_IMAGES = [
   "/images/hero3.webp",
 ];
 const HERO_INTERVAL_MS = 2000;
-
-const testimonials = [
-  {
-    quote:
-      "Bought my second pair this year. Stitching hasn't budged, and the leather only gets better with wear.",
-    name: "Elira B.",
-    location: "VLore",
-  },
-  {
-    quote:
-      "No account, no card details online — paid when it arrived. Shoes fit exactly as described.",
-    name: "Genc M.",
-    location: "Durrës",
-  },
-  {
-    quote:
-      "You can tell these are made by hand. Nothing about them feels mass-produced.",
-    name: "Sara K.",
-    location: "Shkodër",
-  },
-];
-
-const process = [
-  {
-    step: "01",
-    title: "Honest materials",
-    body: "Full-grain leather and natural soles, sourced for durability, not shortcuts.",
-    image: "/images/process1.webp",
-  },
-  {
-    step: "02",
-    title: "Hand-stitched",
-    body: "Each pair built and finished in our Vlore workshop, not off a factory line.",
-    image: "/images/process2.webp",
-  },
-  {
-    step: "03",
-    title: "Delivered, paid on arrival",
-    body: "No online payment required — you inspect the pair, then pay at the door.",
-    image: "/images/process3.webp",
-  },
-];
 
 function HeroBackground() {
   const [index, setIndex] = useState(0);
@@ -93,8 +52,13 @@ function HeroBackground() {
 }
 
 export default function Home() {
+  const { t } = useTranslation();
   const [featured, setFeatured] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    document.title = "Këpucë e Artë";
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -116,6 +80,45 @@ export default function Home() {
     };
   }, []);
 
+  const process = [
+    {
+      step: "01",
+      title: t("home.process.step1Title"),
+      body: t("home.process.step1Body"),
+      image: "/images/process1.webp",
+    },
+    {
+      step: "02",
+      title: t("home.process.step2Title"),
+      body: t("home.process.step2Body"),
+      image: "/images/process2.webp",
+    },
+    {
+      step: "03",
+      title: t("home.process.step3Title"),
+      body: t("home.process.step3Body"),
+      image: "/images/process3.webp",
+    },
+  ];
+
+  const testimonials = [
+    {
+      quote: t("home.testimonials.t1Quote"),
+      name: t("home.testimonials.t1Name"),
+      location: t("home.testimonials.t1Location"),
+    },
+    {
+      quote: t("home.testimonials.t2Quote"),
+      name: t("home.testimonials.t2Name"),
+      location: t("home.testimonials.t2Location"),
+    },
+    {
+      quote: t("home.testimonials.t3Quote"),
+      name: t("home.testimonials.t3Name"),
+      location: t("home.testimonials.t3Location"),
+    },
+  ];
+
   return (
     <div>
       {/* Hero */}
@@ -124,7 +127,7 @@ export default function Home() {
 
         <div className="relative mx-auto max-w-6xl px-5 sm:px-6 md:px-8 py-16 sm:py-24 md:py-40 flex flex-col items-start">
           <Stamp tone="oxblood" className="mb-4 sm:mb-6">
-            Est. Vlore
+            {t("home.heroStamp")}
           </Stamp>
           <h1
             className="font-display text-4xl sm:text-5xl md:text-7xl leading-[0.95] tracking-tight text-ink"
@@ -134,27 +137,28 @@ export default function Home() {
               textShadow: "0 0 1px #fff, 0 2px 20px rgba(0,0,0,0.2)",
             }}
           >
-            Shoes made
-            <br />
-            for walking.
+            {t("home.heroTitle").split("\n").map((line, i, arr) => (
+              <span key={i}>
+                {line}
+                {i < arr.length - 1 && <br />}
+              </span>
+            ))}
           </h1>
           <p className="mt-4 sm:mt-6 max-w-md text-paper/90 leading-relaxed text-sm sm:text-base">
-            Këpucë e Artë is a small footwear shop in Vlore — honest materials,
-            real stitching, no gimmicks. Every pair ships pay on delivery,
-            nothing to enter online.
+            {t("home.heroSubtitle")}
           </p>
           <div className="mt-6 sm:mt-8 flex flex-wrap gap-3 sm:gap-4">
             <Link
               to="/products"
               className="inline-flex items-center justify-center px-5 sm:px-6 py-3 bg-paper text-ink font-mono text-xs uppercase tracking-stamp hover:bg-oxblood hover:text-paper transition-colors w-full sm:w-auto"
             >
-              Shop the collection
+              {t("home.shopCollection")}
             </Link>
             <Link
               to="/contact"
               className="inline-flex items-center justify-center px-5 sm:px-6 py-3 border border-paper text-paper font-mono text-xs uppercase tracking-stamp hover:border-oxblood hover:text-oxblood transition-colors w-full sm:w-auto"
             >
-              Visit the shop
+              {t("home.visitShop")}
             </Link>
           </div>
         </div>
@@ -164,20 +168,20 @@ export default function Home() {
       <section className="mx-auto max-w-6xl px-5 sm:px-6 md:px-8 py-12 sm:py-16 md:py-24">
         <div className="flex items-end justify-between mb-6 sm:mb-10 gap-4">
           <h2 className="font-display text-xl sm:text-2xl md:text-3xl">
-            Featured pairs
+            {t("home.featuredPairs")}
           </h2>
           <Link
             to="/products"
             className="font-mono text-xs uppercase tracking-stamp hover:text-oxblood whitespace-nowrap shrink-0"
           >
-            View all →
+            {t("home.viewAll")}
           </Link>
         </div>
 
-        {loading && <p className="text-stone">Loading…</p>}
+        {loading && <p className="text-stone">{t("home.loadingProducts")}</p>}
 
         {!loading && featured.length === 0 && (
-          <p className="text-stone">Coming soon.</p>
+          <p className="text-stone">{t("home.comingSoon")}</p>
         )}
 
         {!loading && featured.length > 0 && (
@@ -190,16 +194,14 @@ export default function Home() {
         <div className="mx-auto max-w-6xl px-5 sm:px-6 md:px-8 py-14 sm:py-20 md:py-24 grid md:grid-cols-2 gap-8 md:gap-16 items-center">
           <div>
             <Stamp tone="oxblood" className="mb-4 sm:mb-6">
-              Our craft
+              {t("home.craftStamp")}
             </Stamp>
             <h2 className="font-display text-2xl sm:text-3xl md:text-4xl leading-tight tracking-tight">
-              Built by hand, in a small workshop in Vlore.
+              {t("home.craftTitle")}
             </h2>
           </div>
           <p className="text-stone leading-relaxed text-sm sm:text-base">
-            We don't chase trends or mass-produce. Every pair that leaves our
-            workshop has been cut, stitched, and finished by someone who knows
-            your name — not a machine on a line. It takes longer. It's worth it.
+            {t("home.craftBody")}
           </p>
         </div>
       </section>
@@ -208,7 +210,7 @@ export default function Home() {
       <section className="border-t border-stone-line">
         <div className="mx-auto max-w-6xl px-5 sm:px-6 md:px-8 py-14 sm:py-20 md:py-24">
           <h2 className="font-display text-2xl sm:text-3xl mb-8 sm:mb-12">
-            How it's made
+            {t("home.howItsMadeTitle")}
           </h2>
           <div className="grid sm:grid-cols-3 gap-8 sm:gap-6 md:gap-10">
             {process.map((p) => (
@@ -237,19 +239,19 @@ export default function Home() {
       <section className="border-t border-stone-line bg-panel/40">
         <div className="mx-auto max-w-6xl px-5 sm:px-6 md:px-8 py-14 sm:py-20 md:py-24">
           <h2 className="font-display text-2xl sm:text-3xl mb-8 sm:mb-12">
-            What people say
+            {t("home.testimonialsTitle")}
           </h2>
           <div className="grid sm:grid-cols-3 gap-6 sm:gap-8">
-            {testimonials.map((t) => (
+            {testimonials.map((tm) => (
               <div
-                key={t.name}
+                key={tm.name}
                 className="border border-stone-line bg-paper p-5 sm:p-6"
               >
                 <p className="text-ink text-sm leading-relaxed mb-4">
-                  "{t.quote}"
+                  "{tm.quote}"
                 </p>
                 <p className="font-mono text-xs uppercase tracking-stamp text-stone">
-                  {t.name} — {t.location}
+                  {tm.name} — {tm.location}
                 </p>
               </div>
             ))}

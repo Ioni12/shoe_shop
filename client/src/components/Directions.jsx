@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import Stamp from "./Stamp";
 
 const SHOP_ADDRESS = "Lagja Pavaresia, Vlorë, Albania";
@@ -5,19 +6,20 @@ const MAPS_QUERY = encodeURIComponent(SHOP_ADDRESS);
 const MAPS_EMBED_SRC = `https://www.google.com/maps?q=${MAPS_QUERY}&output=embed`;
 const MAPS_DIRECTIONS_HREF = `https://www.google.com/maps/dir/?api=1&destination=${MAPS_QUERY}`;
 
-const hours = [
-  { day: "Mon – Fri", time: "10:00 – 19:00" },
-  { day: "Saturday", time: "10:00 – 16:00" },
-  { day: "Sunday", time: "Closed" },
-];
-
 /**
  * Shared shop-location component.
  * variant="compact"  -> smaller map, used on Home.jsx
  * variant="full"      -> larger map + hours + full details, used on Contact page
  */
 export default function Directions({ variant = "full", className = "" }) {
+  const { t } = useTranslation();
   const isCompact = variant === "compact";
+
+  const hours = [
+    { day: t("contact.hours.monFri"), time: t("contact.hours.monFriTime") },
+    { day: t("contact.hours.saturday"), time: t("contact.hours.saturdayTime") },
+    { day: t("contact.hours.sunday"), time: t("contact.hours.sundayTime") },
+  ];
 
   return (
     <div className={className}>
@@ -30,7 +32,7 @@ export default function Directions({ variant = "full", className = "" }) {
         <div className="flex flex-col justify-center">
           {!isCompact && (
             <Stamp tone="oxblood" className="mb-4 sm:mb-6 w-fit">
-              Find us
+              {t("directions.findUsStamp")}
             </Stamp>
           )}
           <h2
@@ -40,7 +42,7 @@ export default function Directions({ variant = "full", className = "" }) {
                 : "text-3xl sm:text-4xl mb-4"
             }`}
           >
-            Visit the workshop
+            {t("directions.visitTitle")}
           </h2>
           <p className="text-stone text-sm sm:text-base leading-relaxed mb-1">
             {SHOP_ADDRESS}
@@ -66,7 +68,7 @@ export default function Directions({ variant = "full", className = "" }) {
             rel="noopener noreferrer"
             className="mt-6 inline-flex items-center justify-center px-6 py-3 bg-ink text-paper font-mono text-xs uppercase tracking-stamp hover:bg-oxblood transition-colors w-fit"
           >
-            Get directions
+            {t("directions.getDirections")}
           </a>
         </div>
 
@@ -79,7 +81,7 @@ export default function Directions({ variant = "full", className = "" }) {
           }`}
         >
           <iframe
-            title="Këpucë e Artë shop location"
+            title={t("directions.mapTitle")}
             src={MAPS_EMBED_SRC}
             className="w-full h-full grayscale-[15%] contrast-[1.05]"
             style={{ border: 0 }}
