@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import Stamp from "../components/Stamp";
 import ProductImageGallery from "../components/ProductImageGallery";
 import RelatedProducts from "../components/RelatedProducts";
@@ -11,6 +12,7 @@ import { useCart } from "../context/CartContext";
 
 export default function ProductDetail() {
   const { id } = useParams();
+  const { t, i18n } = useTranslation();
   const { addItem } = useCart();
 
   const [product, setProduct] = useState(null);
@@ -49,10 +51,29 @@ export default function ProductDetail() {
     };
   }, [id]);
 
+  // Resolve localised name/description from the product object
+  const productName = product
+    ? typeof product.name === "object"
+      ? product.name?.[i18n.language] || product.name?.sq || ""
+      : product.name || ""
+    : "";
+
+  const productDescription = product
+    ? typeof product.description === "object"
+      ? product.description?.[i18n.language] || product.description?.sq || ""
+      : product.description || ""
+    : "";
+
+  useEffect(() => {
+    if (productName) {
+      document.title = `${productName} — Këpucë e Artë`;
+    }
+  }, [productName]);
+
   if (loading) {
     return (
       <div className="mx-auto max-w-6xl px-5 md:px-8 py-16">
-        <p className="text-stone">Loading…</p>
+        <p className="text-stone">{t("productDetail.loading")}</p>
       </div>
     );
   }
@@ -61,13 +82,14 @@ export default function ProductDetail() {
     return (
       <div className="mx-auto max-w-6xl px-5 md:px-8 py-16">
         <p className="text-oxblood">
-          Couldn't load this product{error ? `: ${error}` : "."}
+          {t("productDetail.errorLoading")}
+          {error ? `: ${error}` : "."}
         </p>
         <Link
           to="/products"
           className="mt-4 inline-block text-sm hover:text-oxblood"
         >
-          ← Back to products
+          {t("productDetail.backToProducts")}
         </Link>
       </div>
     );
@@ -96,7 +118,6 @@ export default function ProductDetail() {
     if (!canAddToCart) return;
     addItem({
       productId: product._id,
-      name: product.name,
       price: product.price,
       image: product.images?.[0],
       variant: hasVariants
@@ -113,7 +134,7 @@ export default function ProductDetail() {
       <div className="mx-auto max-w-6xl px-5 md:px-8 py-16 grid md:grid-cols-2 gap-12 min-w-0">
         <ProductImageGallery
           images={product.images}
-          productName={product.name}
+          productName={productName}
         />
 
         {/* Details */}
@@ -123,12 +144,12 @@ export default function ProductDetail() {
               {product.category}
             </Stamp>
           )}
-          <h1 className="font-display text-3xl md:text-4xl">{product.name}</h1>
+          <h1 className="font-display text-3xl md:text-4xl">{productName}</h1>
           <p className="mt-2 font-mono text-lg text-oxblood">
-            {formatPrice(product.price)}
+            {formatPrice(product.price, i18n.language)}
           </p>
           <ExpandableText
-            text={product.description}
+            text={productDescription}
             limit={220}
             className="mt-6 text-stone"
           />
@@ -143,7 +164,7 @@ export default function ProductDetail() {
 
           {hasVariants && (
             <div className="mt-8">
-              <div className="stamp text-ink mb-3">Size</div>
+              <div className="stamp text-ink mb-3">{t("productDetail.selectSize")}</div>
               <div className="flex flex-wrap gap-2">
                 {sizes.map((size) => (
                   <button
@@ -166,7 +187,7 @@ export default function ProductDetail() {
 
               {selectedSize && (
                 <>
-                  <div className="stamp text-ink mb-3 mt-6">Color</div>
+                  <div className="stamp text-ink mb-3 mt-6">{t("productDetail.selectColor")}</div>
                   <div className="flex flex-wrap gap-2">
                     {colorsForSize.map((v) => (
                       <button
@@ -185,7 +206,7 @@ export default function ProductDetail() {
                         }`}
                       >
                         {v.color}
-                        {v.stock === 0 ? " (out of stock)" : ""}
+                        {v.stock === 0 ? ` ${t("productDetail.outOfStock")}` : ""}
                       </button>
                     ))}
                   </div>
@@ -199,7 +220,7 @@ export default function ProductDetail() {
               <button
                 onClick={() => setQuantity((q) => Math.max(1, q - 1))}
                 className="w-9 h-9 flex items-center justify-center hover:bg-panel"
-                aria-label="Decrease quantity"
+                aria-label={t("productDetail.decreaseQty")}
               >
                 −
               </button>
@@ -213,7 +234,7 @@ export default function ProductDetail() {
                   )
                 }
                 className="w-9 h-9 flex items-center justify-center hover:bg-panel"
-                aria-label="Increase quantity"
+                aria-label={t("productDetail.increaseQty")}
               >
                 +
               </button>
@@ -228,13 +249,13 @@ export default function ProductDetail() {
                   : "bg-panel text-stone cursor-not-allowed"
               }`}
             >
-              {added ? "Added ✓" : "Add to cart"}
+              {added ? t("productDetail.added") : t("productDetail.addToCart")}
             </button>
           </div>
 
           {hasVariants && !selectedVariant && (
             <p className="mt-3 text-xs text-stone">
-              Select a size and color to continue.
+              {t("productDetail.selectSizeAndColor")}
             </p>
           )}
         </div>

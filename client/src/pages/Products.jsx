@@ -1,21 +1,21 @@
 import { useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { products as productsApi } from "../api/client";
 import ProductCard from "../components/ProductCard";
 import { getImageUrl } from "../lib/format";
 import { deriveCategoryThumbnails } from "../lib/categories";
 
-const SORT_OPTIONS = [
-  { value: "name-asc", label: "Name (A–Z)" },
-  { value: "price-asc", label: "Price (low to high)" },
-  { value: "price-desc", label: "Price (high to low)" },
-];
-
 export default function Products() {
+  const { t, i18n } = useTranslation();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [category, setCategory] = useState("");
   const [sort, setSort] = useState("name-asc");
+
+  useEffect(() => {
+    document.title = `${t("products.title")} — Këpucë e Artë`;
+  }, [t]);
 
   useEffect(() => {
     let cancelled = false;
@@ -37,6 +37,12 @@ export default function Products() {
     };
   }, []);
 
+  const SORT_OPTIONS = [
+    { value: "name-asc", label: t("products.sort.nameAsc") },
+    { value: "price-asc", label: t("products.sort.priceAsc") },
+    { value: "price-desc", label: t("products.sort.priceDesc") },
+  ];
+
   // Derived from active/public products only — a category thumbnail here
   // will never come from a product hidden from the storefront.
   const categoryThumbs = useMemo(
@@ -52,22 +58,31 @@ export default function Products() {
     list = [...list].sort((a, b) => {
       if (sort === "price-asc") return a.price - b.price;
       if (sort === "price-desc") return b.price - a.price;
-      return a.name.localeCompare(b.name);
+      // Sort by name in current language
+      const nameA =
+        typeof a.name === "object"
+          ? a.name?.[i18n.language] || a.name?.sq || ""
+          : a.name || "";
+      const nameB =
+        typeof b.name === "object"
+          ? b.name?.[i18n.language] || b.name?.sq || ""
+          : b.name || "";
+      return nameA.localeCompare(nameB, i18n.language);
     });
 
     return list;
-  }, [products, category, sort]);
+  }, [products, category, sort, i18n.language]);
 
   return (
     <div className="mx-auto max-w-6xl px-5 md:px-8 py-16">
       <div className="flex items-end justify-between gap-4 mb-8">
-        <h1 className="font-display text-3xl md:text-4xl">All products</h1>
+        <h1 className="font-display text-3xl md:text-4xl">{t("products.title")}</h1>
 
         {!loading && !error && products.length > 0 && (
           <select
             value={sort}
             onChange={(e) => setSort(e.target.value)}
-            aria-label="Sort products"
+            aria-label={t("products.sortProducts")}
             className="border border-stone-line bg-paper px-4 py-2 text-sm font-mono"
           >
             {SORT_OPTIONS.map((opt) => (
@@ -83,7 +98,7 @@ export default function Products() {
         <div
           className="flex flex-wrap gap-3 mb-10"
           role="radiogroup"
-          aria-label="Filter by category"
+          aria-label={t("products.filterByCategory")}
         >
           <button
             onClick={() => setCategory("")}
@@ -95,7 +110,7 @@ export default function Products() {
                 : "border-stone-line hover:border-ink"
             }`}
           >
-            All
+            {t("products.allCategories")}
           </button>
 
           {categoryThumbs.map((c) => (
@@ -127,22 +142,19 @@ export default function Products() {
         </div>
       )}
 
-      {loading && <p className="text-stone">Loading products…</p>}
+      {loading && <p className="text-stone">{t("products.loadingProducts")}</p>}
 
       {!loading && error && (
-        <p className="text-oxblood">Couldn't load products: {error}</p>
+        <p className="text-oxblood">{t("products.errorLoading", { error })}</p>
       )}
 
       {!loading && !error && products.length === 0 && (
-        <p className="text-stone">No products yet — check back soon.</p>
+        <p className="text-stone">{t("products.noProducts")}</p>
       )}
 
-      {!loading &&
-        !error &&
-        products.length > 0 &&
-        visibleProducts.length === 0 && (
-          <p className="text-stone">No products match this filter.</p>
-        )}
+      {!loading && !error && products.length > 0 && visibleProducts.length === 0 && (
+        <p className="text-stone">{t("products.noMatch")}</p>
+      )}
 
       {!loading && !error && visibleProducts.length > 0 && (
         <div className="grid grid-cols-2 md:grid-cols-3 gap-x-6 gap-y-12">

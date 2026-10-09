@@ -1,8 +1,10 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { getImageUrl } from "../lib/format";
 import ImageLightbox from "./ImageLightbox";
 
 export default function ProductImageGallery({ images, productName }) {
+  const { t } = useTranslation();
   const [activeImage, setActiveImage] = useState(0);
   const [lightboxOpen, setLightboxOpen] = useState(false);
 
@@ -14,7 +16,11 @@ export default function ProductImageGallery({ images, productName }) {
         type="button"
         onClick={() => hasImages && setLightboxOpen(true)}
         className="w-full aspect-square bg-panel flex items-center justify-center relative"
-        aria-label={hasImages ? "Open image, zoomable" : "No image available"}
+        aria-label={
+          hasImages
+            ? t("productDetail.openImage")
+            : t("productDetail.noImageAvailable")
+        }
         disabled={!hasImages}
       >
         {hasImages ? (
@@ -24,7 +30,7 @@ export default function ProductImageGallery({ images, productName }) {
             className="w-full h-full object-cover"
           />
         ) : (
-          <span className="stamp text-ink text-xs">No image</span>
+          <span className="stamp text-ink text-xs">{t("common.noImage")}</span>
         )}
       </button>
 
@@ -37,7 +43,10 @@ export default function ProductImageGallery({ images, productName }) {
               className={`w-16 h-16 bg-panel overflow-hidden border ${
                 i === activeImage ? "border-oxblood" : "border-transparent"
               }`}
-              aria-label={`View image ${i + 1} of ${images.length}`}
+              aria-label={t("productDetail.viewImage", {
+                n: i + 1,
+                total: images.length,
+              })}
               aria-current={i === activeImage}
             >
               <img

@@ -7,7 +7,11 @@ const orderItemSchema = new mongoose.Schema(
       ref: "Product",
       required: true,
     },
-    name: { type: String, required: true }, // snapshot at time of order
+    name: {
+      // Snapshot at time of order — stored as {sq, en} object
+      sq: { type: String, required: true },
+      en: { type: String, default: "" },
+    },
     price: { type: Number, required: true }, // snapshot at time of order
     variant: {
       size: { type: String, trim: true },
@@ -39,7 +43,7 @@ const orderSchema = new mongoose.Schema(
     orderNumber: {
       type: String,
       required: true,
-      unique: true, // e.g. "ORD-0001"
+      unique: true,
     },
     customer: {
       firstName: { type: String, required: true, trim: true },
@@ -65,7 +69,7 @@ const orderSchema = new mongoose.Schema(
     paymentMethod: {
       type: String,
       default: "Pay on Delivery",
-      enum: ["Pay on Delivery"], // only option supported in MVP
+      enum: ["Pay on Delivery"],
     },
     status: {
       type: String,
@@ -75,6 +79,11 @@ const orderSchema = new mongoose.Schema(
     statusHistory: {
       type: [statusHistoryEntrySchema],
       default: () => [{ status: "New" }],
+    },
+    lang: {
+      type: String,
+      enum: ["sq", "en"],
+      default: "sq",
     },
   },
   { timestamps: true },

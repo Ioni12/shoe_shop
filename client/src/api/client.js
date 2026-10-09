@@ -44,7 +44,10 @@ async function request(path, { method = "GET", body, auth = false } = {}) {
   }
 
   if (!res.ok) {
-    throw new Error(data?.error || `Request failed (${res.status})`);
+    // Attach code so callers can do t(`errors.${err.code}`, { defaultValue: err.message })
+    const err = new Error(data?.message || data?.error || `Request failed (${res.status})`);
+    err.code = data?.code || null;
+    throw err;
   }
 
   return data;
@@ -85,7 +88,7 @@ export const reviews = {
   create: (productId, data) =>
     request(`/products/${productId}/reviews`, {
       method: "POST",
-      body: data, // was: JSON.stringify(data) — request() already stringifies, this was double-encoding
+      body: data,
     }),
   listAll: () => request("/reviews", { auth: true }),
   remove: (id) => request(`/reviews/${id}`, { method: "DELETE", auth: true }),

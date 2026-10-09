@@ -12,14 +12,12 @@ const variantSchema = new mongoose.Schema(
 const productSchema = new mongoose.Schema(
   {
     name: {
-      type: String,
-      required: [true, "Product name is required"],
-      trim: true,
+      sq: { type: String, required: [true, "Product name (sq) is required"], trim: true },
+      en: { type: String, default: "", trim: true },
     },
     description: {
-      type: String,
-      required: [true, "Product description is required"],
-      trim: true,
+      sq: { type: String, default: "" },
+      en: { type: String, default: "" },
     },
     price: {
       type: Number,
@@ -50,5 +48,8 @@ const productSchema = new mongoose.Schema(
   },
   { timestamps: true },
 );
+
+// Text index on both language variants for search
+productSchema.index({ "name.sq": "text", "name.en": "text", "description.sq": "text", "description.en": "text" });
 
 module.exports = mongoose.model("Product", productSchema);

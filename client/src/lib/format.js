@@ -7,18 +7,31 @@ export function getImageUrl(path) {
   return `${API_HOST}${path}`;
 }
 
-export function formatPrice(value) {
+/**
+ * Format a price in ALL (Albanian Lek).
+ * Pass the current i18n.language so the number locale matches UI language.
+ */
+export function formatPrice(value, lang = "sq") {
   if (value === null || value === undefined || Number.isNaN(Number(value)))
     return "";
-  return `ALL ${Number(value).toFixed(2)}`;
+  return new Intl.NumberFormat(lang, {
+    style: "currency",
+    currency: "ALL",
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(Number(value));
 }
 
-export function formatDate(value) {
+/**
+ * Format a date/time string.
+ * Pass the current i18n.language so date locale matches UI language.
+ */
+export function formatDate(value, lang = "sq") {
   if (!value) return "";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "";
-  return date.toLocaleString(undefined, {
+  return new Intl.DateTimeFormat(lang, {
     dateStyle: "medium",
     timeStyle: "short",
-  });
+  }).format(date);
 }

@@ -1,6 +1,8 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 export default function ExpandableText({ text, limit = 220, className = "" }) {
+  const { t } = useTranslation();
   const [expanded, setExpanded] = useState(false);
 
   if (!text) return null;
@@ -18,7 +20,7 @@ export default function ExpandableText({ text, limit = 220, className = "" }) {
           onClick={() => setExpanded((e) => !e)}
           className="mt-2 font-mono text-xs uppercase tracking-stamp text-oxblood hover:underline"
         >
-          {expanded ? "Show less" : "Show more"}
+          {expanded ? t("common.showLess") : t("common.showMore")}
         </button>
       )}
     </div>

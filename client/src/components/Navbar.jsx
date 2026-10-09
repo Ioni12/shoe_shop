@@ -1,16 +1,19 @@
 import { useState, useEffect } from "react";
 import { NavLink } from "react-router-dom";
 import { ShoppingBag, Menu, X, PackageSearch } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { useCart } from "../context/CartContext";
+import LanguageToggle from "./LanguageToggle";
 
 const navLinks = [
-  { to: "/", label: "Home", end: true },
-  { to: "/products", label: "Products" },
-  { to: "/contact", label: "Contact" },
-  { to: "/about", label: "About" },
+  { to: "/", labelKey: "nav.home", end: true },
+  { to: "/products", labelKey: "nav.products" },
+  { to: "/contact", labelKey: "nav.contact" },
+  { to: "/about", labelKey: "nav.about" },
 ];
 
 export default function Navbar() {
+  const { t, i18n } = useTranslation();
   const { itemCount } = useCart();
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -41,6 +44,11 @@ export default function Navbar() {
       document.body.style.overflow = "";
     };
   }, [menuOpen]);
+
+  const cartAriaLabel = t(
+    itemCount === 1 ? "nav.cartLabel" : "nav.cartLabel_other",
+    { count: itemCount },
+  );
 
   return (
     <>
@@ -96,13 +104,15 @@ export default function Navbar() {
                   }`
                 }
               >
-                {l.label}
+                {t(l.labelKey)}
               </NavLink>
             ))}
           </nav>
 
-          {/* Right side: track order + cart + mobile menu toggle */}
+          {/* Right side: language toggle + track order + cart + mobile menu toggle */}
           <div className="flex items-center gap-3 sm:gap-4 shrink-0">
+            <LanguageToggle />
+
             {/* Track order: small secondary link, desktop only */}
             <NavLink
               to="/track-order"
@@ -111,16 +121,16 @@ export default function Navbar() {
                   isActive ? "text-brass" : "text-stone hover:text-brass"
                 }`
               }
-              aria-label="Track your order"
+              aria-label={t("nav.trackOrder")}
             >
               <PackageSearch size={16} strokeWidth={1.75} />
-              <span className="hidden lg:inline">Track order</span>
+              <span className="hidden lg:inline">{t("nav.trackOrder")}</span>
             </NavLink>
 
             <NavLink
               to="/cart"
               className="relative flex items-center gap-2 font-mono text-sm uppercase tracking-stamp text-ink hover:text-brass transition-colors duration-300 p-1.5"
-              aria-label={`Cart, ${itemCount} item${itemCount === 1 ? "" : "s"}`}
+              aria-label={cartAriaLabel}
             >
               <span className="relative">
                 <ShoppingBag size={22} strokeWidth={1.75} />
@@ -130,14 +140,14 @@ export default function Navbar() {
                   </span>
                 )}
               </span>
-              <span className="hidden sm:inline">Cart</span>
+              <span className="hidden sm:inline">{t("nav.cart")}</span>
             </NavLink>
 
             {/* Hamburger toggle: mobile only */}
             <button
               type="button"
               className="md:hidden flex items-center justify-center w-9 h-9 shrink-0 text-ink"
-              aria-label={menuOpen ? "Close menu" : "Open menu"}
+              aria-label={menuOpen ? t("nav.closeMenu") : t("nav.openMenu")}
               aria-expanded={menuOpen}
               onClick={() => setMenuOpen((v) => !v)}
             >
@@ -171,7 +181,7 @@ export default function Navbar() {
                   }`
                 }
               >
-                {l.label}
+                {t(l.labelKey)}
               </NavLink>
             ))}
 
@@ -186,7 +196,7 @@ export default function Navbar() {
               }
             >
               <PackageSearch size={14} strokeWidth={1.75} />
-              Track order
+              {t("nav.trackOrder")}
             </NavLink>
           </div>
         </nav>

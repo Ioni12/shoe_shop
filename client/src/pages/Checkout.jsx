@@ -1,12 +1,16 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, Navigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useCart } from "../context/CartContext";
 import { orders as ordersApi } from "../api/client";
 import { formatPrice, getImageUrl } from "../lib/format";
+import { products as productsApi } from "../api/client";
 
 export default function Checkout() {
+  const { t, i18n } = useTranslation();
   const { items, total, clearCart } = useCart();
   const navigate = useNavigate();
+  const [productMap, setProductMap] = useState({});
 
   const [form, setForm] = useState({
     firstName: "",
@@ -20,10 +24,36 @@ export default function Checkout() {
   const [error, setError] = useState(null);
   const [orderPlaced, setOrderPlaced] = useState(false);
 
+  useEffect(() => {
+    document.title = `${t("checkout.title")} — Këpucë e Artë`;
+  }, [t]);
+
+  // Fetch product data to resolve localised names for the order summary
+  useEffect(() => {
+    if (items.length === 0) return;
+    const ids = [...new Set(items.map((i) => i.productId))];
+    Promise.all(ids.map((id) => productsApi.get(id).catch(() => null))).then(
+      (results) => {
+        const map = {};
+        results.forEach((p) => {
+          if (p) map[p._id] = p;
+        });
+        setProductMap(map);
+      },
+    );
+  }, [items.length]);
+
+  function resolveProductName(item) {
+    const product = productMap[item.productId];
+    if (!product) return "…";
+    if (typeof product.name === "object") {
+      return product.name?.[i18n.language] || product.name?.sq || "";
+    }
+    return product.name || "";
+  }
+
   // Once an order has been successfully placed, never redirect to /cart
-  // again for the rest of this component's life — even if cartCart() causes
-  // items to become empty and this component re-renders before React
-  // Router finishes transitioning to /order-confirmation.
+  // again for the rest of this component's life.
   if (items.length === 0 && !orderPlaced) {
     return <Navigate to="/cart" replace />;
   }
@@ -37,7 +67,6 @@ export default function Checkout() {
     e.preventDefault();
     setSubmitting(true);
     setError(null);
-    console.log("[DEBUG] handleSubmit fired");
 
     try {
       const order = await ordersApi.create({
@@ -47,23 +76,17 @@ export default function Checkout() {
           quantity: i.quantity,
           variant: i.variant,
         })),
+        lang: i18n.language,
       });
-      console.log("[DEBUG] order created, response:", order);
 
-      // Set this BEFORE navigate/clearCart — it permanently disables the
-      // items.length===0 guard above, so no re-render of this component
-      // (however it's timed relative to the route transition) can ever
-      // redirect to /cart again once an order has actually been placed.
       setOrderPlaced(true);
-
-      console.log("[DEBUG] about to navigate to /order-confirmation");
       navigate("/order-confirmation", { state: { order } });
-      console.log("[DEBUG] navigate() called");
       clearCart();
-      console.log("[DEBUG] cart cleared");
     } catch (err) {
-      console.log("[DEBUG] caught error:", err);
-      setError(err.message);
+      const code = err.code;
+      setError(
+        code ? t(`errors.${code}`, { defaultValue: err.message }) : err.message,
+      );
       setSubmitting(false);
     }
   }
@@ -72,7 +95,7 @@ export default function Checkout() {
     <div className="mx-auto max-w-4xl px-5 md:px-8 py-16 grid md:grid-cols-[1.3fr,1fr] gap-16">
       {/* Form */}
       <div>
-        <h1 className="font-display text-3xl md:text-4xl mb-8">Checkout</h1>
+        <h1 className="font-display text-3xl md:text-4xl mb-8">{t("checkout.title")}</h1>
 
         {error && (
           <div className="mb-6 border border-oxblood text-oxblood px-4 py-3 text-sm">
@@ -87,7 +110,7 @@ export default function Checkout() {
                 htmlFor="firstName"
                 className="stamp text-ink mb-2 inline-block"
               >
-                First name
+                {t("checkout.firstName")}
               </label>
               <input
                 id="firstName"
@@ -104,7 +127,7 @@ export default function Checkout() {
                 htmlFor="lastName"
                 className="stamp text-ink mb-2 inline-block"
               >
-                Last name
+                {t("checkout.lastName")}
               </label>
               <input
                 id="lastName"
@@ -120,7 +143,7 @@ export default function Checkout() {
 
           <div>
             <label htmlFor="phone" className="stamp text-ink mb-2 inline-block">
-              Phone
+              {t("checkout.phone")}
             </label>
             <input
               id="phone"
@@ -135,7 +158,7 @@ export default function Checkout() {
 
           <div>
             <label htmlFor="city" className="stamp text-ink mb-2 inline-block">
-              City
+              {t("checkout.city")}
             </label>
             <input
               id="city"
@@ -153,7 +176,7 @@ export default function Checkout() {
               htmlFor="address"
               className="stamp text-ink mb-2 inline-block"
             >
-              Address
+              {t("checkout.address")}
             </label>
             <input
               id="address"
@@ -168,7 +191,7 @@ export default function Checkout() {
 
           <div>
             <label htmlFor="notes" className="stamp text-ink mb-2 inline-block">
-              Notes (optional)
+              {t("checkout.notes")}
             </label>
             <textarea
               id="notes"
@@ -185,53 +208,58 @@ export default function Checkout() {
             disabled={submitting}
             className="w-full px-6 py-3 bg-ink text-paper font-mono text-xs uppercase tracking-stamp hover:bg-oxblood transition-colors disabled:opacity-50"
           >
-            {submitting ? "Placing order…" : "Place order — pay on delivery"}
+            {submitting ? t("checkout.placingOrder") : t("checkout.placeOrder")}
           </button>
         </form>
       </div>
 
       {/* Order summary */}
       <div>
-        <div className="stamp text-ink mb-4">Order summary</div>
+        <div className="stamp text-ink mb-4">{t("checkout.orderSummary")}</div>
         <div className="divide-y divide-stone-line border-y border-stone-line">
-          {items.map((item) => (
-            <div
-              key={`${item.productId}-${item.variant?.size ?? ""}-${item.variant?.color ?? ""}`}
-              className="py-4 flex items-center gap-4"
-            >
-              <div className="w-14 h-14 bg-panel flex-shrink-0 overflow-hidden">
-                {item.image ? (
-                  <img
-                    src={getImageUrl(item.image)}
-                    alt={item.name}
-                    className="w-full h-full object-cover"
-                  />
-                ) : null}
-              </div>
-
-              <div className="flex-1 flex items-baseline justify-between text-sm">
-                <div>
-                  <p>{item.name}</p>
-                  {item.variant && (
-                    <p className="text-xs text-stone font-mono uppercase tracking-stamp mt-0.5">
-                      {item.variant.size ? `Size ${item.variant.size}` : ""}
-                      {item.variant.size && item.variant.color ? " / " : ""}
-                      {item.variant.color ?? ""} × {item.quantity}
-                    </p>
-                  )}
+          {items.map((item) => {
+            const name = resolveProductName(item);
+            return (
+              <div
+                key={`${item.productId}-${item.variant?.size ?? ""}-${item.variant?.color ?? ""}`}
+                className="py-4 flex items-center gap-4"
+              >
+                <div className="w-14 h-14 bg-panel flex-shrink-0 overflow-hidden">
+                  {item.image ? (
+                    <img
+                      src={getImageUrl(item.image)}
+                      alt={name}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : null}
                 </div>
-                <span className="font-mono">
-                  {formatPrice(item.price * item.quantity)}
-                </span>
+
+                <div className="flex-1 flex items-baseline justify-between text-sm">
+                  <div>
+                    <p>{name}</p>
+                    {item.variant && (
+                      <p className="text-xs text-stone font-mono uppercase tracking-stamp mt-0.5">
+                        {item.variant.size
+                          ? t("checkout.sizeLabel", { size: item.variant.size })
+                          : ""}
+                        {item.variant.size && item.variant.color ? " / " : ""}
+                        {item.variant.color ?? ""} × {item.quantity}
+                      </p>
+                    )}
+                  </div>
+                  <span className="font-mono">
+                    {formatPrice(item.price * item.quantity, i18n.language)}
+                  </span>
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
         <div className="mt-6 flex items-center justify-between">
           <span className="font-mono text-xs uppercase tracking-stamp text-stone">
-            Total
+            {t("common.total")}
           </span>
-          <span className="font-display text-2xl">{formatPrice(total)}</span>
+          <span className="font-display text-2xl">{formatPrice(total, i18n.language)}</span>
         </div>
       </div>
     </div>

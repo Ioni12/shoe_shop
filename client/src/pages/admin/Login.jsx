@@ -1,9 +1,11 @@
 import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useAuth } from "../../context/AuthContext";
 import Stamp from "../../components/Stamp";
 
 export default function Login() {
+  const { t } = useTranslation();
   const { login } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -24,7 +26,10 @@ export default function Login() {
       await login(username, password);
       navigate(redirectTo, { replace: true });
     } catch (err) {
-      setError(err.message);
+      const code = err.code;
+      setError(
+        code ? t(`errors.${code}`, { defaultValue: err.message }) : err.message,
+      );
       setSubmitting(false);
     }
   }
@@ -34,9 +39,9 @@ export default function Login() {
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
           <Stamp tone="oxblood" className="mb-4">
-            Admin
+            {t("admin.login.stamp")}
           </Stamp>
-          <h1 className="font-display text-3xl">Kepuca e arte</h1>
+          <h1 className="font-display text-3xl">{t("admin.login.title")}</h1>
         </div>
 
         {error && (
@@ -51,7 +56,7 @@ export default function Login() {
               htmlFor="username"
               className="stamp text-ink mb-2 inline-block"
             >
-              Username
+              {t("admin.login.username")}
             </label>
             <input
               id="username"
@@ -69,7 +74,7 @@ export default function Login() {
               htmlFor="password"
               className="stamp text-ink mb-2 inline-block"
             >
-              Password
+              {t("admin.login.password")}
             </label>
             <input
               id="password"
@@ -86,7 +91,7 @@ export default function Login() {
             disabled={submitting}
             className="w-full px-6 py-3 bg-ink text-paper font-mono text-xs uppercase tracking-stamp hover:bg-oxblood transition-colors disabled:opacity-50"
           >
-            {submitting ? "Signing in…" : "Sign in"}
+            {submitting ? t("admin.login.signingIn") : t("admin.login.signIn")}
           </button>
         </form>
       </div>

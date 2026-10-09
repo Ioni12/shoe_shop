@@ -1,12 +1,15 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { reviews as reviewsApi } from "../api/client";
 import Stamp from "./Stamp";
+import i18n from "../i18n";
 
 function Stars({ value, size = "text-sm" }) {
+  const { t } = useTranslation();
   return (
     <span
       className={`font-mono ${size} text-oxblood`}
-      aria-label={`${value} out of 5 stars`}
+      aria-label={t("reviews.starsLabel", { value })}
     >
       {"★".repeat(Math.round(value))}
       <span className="text-stone-line">
@@ -17,6 +20,7 @@ function Stars({ value, size = "text-sm" }) {
 }
 
 function StarPicker({ value, onChange }) {
+  const { t } = useTranslation();
   return (
     <div className="flex gap-1">
       {[1, 2, 3, 4, 5].map((n) => (
@@ -25,7 +29,7 @@ function StarPicker({ value, onChange }) {
           type="button"
           onClick={() => onChange(n)}
           className="text-xl leading-none"
-          aria-label={`Rate ${n} out of 5`}
+          aria-label={t("reviews.rateN", { n })}
         >
           <span className={n <= value ? "text-oxblood" : "text-stone-line"}>
             ★
@@ -37,6 +41,7 @@ function StarPicker({ value, onChange }) {
 }
 
 export default function ReviewsSection({ productId }) {
+  const { t } = useTranslation();
   const [reviews, setReviews] = useState([]);
   const [count, setCount] = useState(0);
   const [averageRating, setAverageRating] = useState(0);
@@ -86,7 +91,7 @@ export default function ReviewsSection({ productId }) {
   async function handleSubmit(e) {
     e.preventDefault();
     if (!form.rating) {
-      setSubmitError("Please select a star rating.");
+      setSubmitError(t("reviews.selectRating"));
       return;
     }
     setSubmitting(true);
@@ -113,7 +118,10 @@ export default function ReviewsSection({ productId }) {
       setFormOpen(false);
       setTimeout(() => setSubmitted(false), 2500);
     } catch (err) {
-      setSubmitError(err.message);
+      const code = err.code;
+      setSubmitError(
+        code ? t(`errors.${code}`, { defaultValue: err.message }) : err.message,
+      );
     } finally {
       setSubmitting(false);
     }
@@ -123,12 +131,15 @@ export default function ReviewsSection({ productId }) {
     <section className="mx-auto max-w-6xl px-5 md:px-8 py-16 border-t border-stone-line">
       <div className="flex flex-wrap items-center justify-between gap-4 mb-8">
         <div className="flex items-center gap-3">
-          <h2 className="font-display text-2xl md:text-3xl">Reviews</h2>
+          <h2 className="font-display text-2xl md:text-3xl">{t("reviews.title")}</h2>
           {!loading && count > 0 && (
             <span className="flex items-center gap-2">
               <Stars value={averageRating} />
               <span className="text-sm text-stone">
-                {averageRating} ({count} {count === 1 ? "review" : "reviews"})
+                {t(count === 1 ? "reviews.averageLabel" : "reviews.averageLabel_other", {
+                  avg: averageRating,
+                  count,
+                })}
               </span>
             </span>
           )}
@@ -140,7 +151,7 @@ export default function ReviewsSection({ productId }) {
             onClick={() => setFormOpen(true)}
             className="px-5 py-2.5 border border-ink font-mono text-xs uppercase tracking-stamp hover:bg-ink hover:text-paper transition-colors"
           >
-            Write a review
+            {t("reviews.writeReview")}
           </button>
         )}
       </div>
@@ -149,7 +160,7 @@ export default function ReviewsSection({ productId }) {
       {formOpen && (
         <div className="mb-10 border border-stone-line p-6 sm:p-8 max-w-lg">
           <div className="flex items-center justify-between mb-6">
-            <Stamp tone="stone">Write a review</Stamp>
+            <Stamp tone="stone">{t("reviews.writeReview")}</Stamp>
             <button
               type="button"
               onClick={() => {
@@ -157,7 +168,7 @@ export default function ReviewsSection({ productId }) {
                 setSubmitError(null);
               }}
               className="text-stone hover:text-oxblood text-sm"
-              aria-label="Close review form"
+              aria-label={t("reviews.closeForm")}
             >
               ✕
             </button>
@@ -169,7 +180,7 @@ export default function ReviewsSection({ productId }) {
                 htmlFor="reviewerName"
                 className="stamp text-ink mb-1.5 inline-block"
               >
-                Name
+                {t("reviews.nameLabel")}
               </label>
               <input
                 id="reviewerName"
@@ -184,7 +195,9 @@ export default function ReviewsSection({ productId }) {
             </div>
 
             <div>
-              <span className="stamp text-ink mb-1.5 inline-block">Rating</span>
+              <span className="stamp text-ink mb-1.5 inline-block">
+                {t("reviews.ratingLabel")}
+              </span>
               <StarPicker
                 value={form.rating}
                 onChange={(n) => setForm((f) => ({ ...f, rating: n }))}
@@ -196,7 +209,7 @@ export default function ReviewsSection({ productId }) {
                 htmlFor="comment"
                 className="stamp text-ink mb-1.5 inline-block"
               >
-                Comment
+                {t("reviews.commentLabel")}
               </label>
               <textarea
                 id="comment"
@@ -218,25 +231,23 @@ export default function ReviewsSection({ productId }) {
               disabled={submitting}
               className="px-6 py-3 bg-ink text-paper font-mono text-xs uppercase tracking-stamp hover:bg-oxblood transition-colors disabled:opacity-50"
             >
-              {submitting ? "Submitting…" : "Submit review"}
+              {submitting ? t("reviews.submitting") : t("reviews.submitReview")}
             </button>
           </form>
         </div>
       )}
 
       {submitted && !formOpen && (
-        <p className="mb-8 text-sm text-stone">
-          Thanks — your review has been posted.
-        </p>
+        <p className="mb-8 text-sm text-stone">{t("reviews.thankYou")}</p>
       )}
 
       {/* List */}
-      {loading && <p className="text-stone">Loading…</p>}
+      {loading && <p className="text-stone">{t("reviews.loading")}</p>}
       {!loading && error && (
-        <p className="text-oxblood">Couldn't load reviews: {error}</p>
+        <p className="text-oxblood">{t("reviews.errorLoading", { error })}</p>
       )}
       {!loading && !error && reviews.length === 0 && (
-        <p className="text-stone">No reviews yet — be the first.</p>
+        <p className="text-stone">{t("reviews.noReviews")}</p>
       )}
       {!loading && !error && reviews.length > 0 && (
         <ul className="divide-y divide-stone-line border-t border-stone-line">
@@ -245,7 +256,9 @@ export default function ReviewsSection({ productId }) {
               <div className="flex items-center justify-between gap-3 mb-1">
                 <span className="text-sm font-medium">{r.reviewerName}</span>
                 <span className="text-xs text-stone font-mono">
-                  {new Date(r.createdAt).toLocaleDateString()}
+                  {new Intl.DateTimeFormat(i18n.language, { dateStyle: "medium" }).format(
+                    new Date(r.createdAt),
+                  )}
                 </span>
               </div>
               <Stars value={r.rating} />

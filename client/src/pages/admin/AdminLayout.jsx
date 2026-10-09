@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useAuth } from "../../context/AuthContext";
 
 export default function AdminLayout() {
+  const { t } = useTranslation();
   const { admin, logout } = useAuth();
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -20,16 +22,16 @@ export default function AdminLayout() {
       <header className="border-b border-stone-line">
         <div className="mx-auto max-w-6xl px-5 md:px-8 h-16 flex items-center justify-between">
           <div className="flex items-center gap-8">
-            <span className="font-display text-lg">Kepuca e arte</span>
+            <span className="font-display text-lg">{t("admin.layout.brand")}</span>
             <nav className="hidden md:flex items-center gap-6 font-mono text-xs uppercase tracking-stamp">
               <NavLink to="/admin/products" className={linkClass}>
-                Products
+                {t("admin.layout.products")}
               </NavLink>
               <NavLink to="/admin/orders" className={linkClass}>
-                Orders
+                {t("admin.layout.orders")}
               </NavLink>
               <NavLink to="/admin/reviews" className={linkClass}>
-                Reviews
+                {t("admin.layout.reviews")}
               </NavLink>
             </nav>
           </div>
@@ -41,7 +43,7 @@ export default function AdminLayout() {
               </span>
             )}
             <button onClick={handleLogout} className="hover:text-oxblood">
-              Log out
+              {t("admin.layout.logout")}
             </button>
 
             {/* Mobile menu toggle */}
@@ -49,7 +51,7 @@ export default function AdminLayout() {
               type="button"
               onClick={() => setMenuOpen((v) => !v)}
               className="md:hidden flex flex-col justify-center gap-1 w-6 h-6"
-              aria-label="Toggle navigation"
+              aria-label={t("admin.layout.toggleNav")}
               aria-expanded={menuOpen}
             >
               <span className="block h-px w-full bg-ink" />
@@ -67,21 +69,21 @@ export default function AdminLayout() {
               className={linkClass}
               onClick={() => setMenuOpen(false)}
             >
-              Products
+              {t("admin.layout.products")}
             </NavLink>
             <NavLink
               to="/admin/orders"
               className={linkClass}
               onClick={() => setMenuOpen(false)}
             >
-              Orders
+              {t("admin.layout.orders")}
             </NavLink>
             <NavLink
               to="/admin/reviews"
               className={linkClass}
               onClick={() => setMenuOpen(false)}
             >
-              Reviews
+              {t("admin.layout.reviews")}
             </NavLink>
           </nav>
         )}
