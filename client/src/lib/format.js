@@ -1,6 +1,7 @@
-const API_HOST =
-  import.meta.env.VITE_API_URL?.replace(/\/api\/?$/, "") ||
-  "http://localhost:5000";
+// "/api" (production, same domain) becomes "" so image paths stay relative.
+const API_HOST = (
+  import.meta.env.VITE_API_URL ?? "http://localhost:5000/api"
+).replace(/\/api\/?$/, "");
 
 export function getImageUrl(path) {
   if (!path) return "";

@@ -1,4 +1,7 @@
-require("dotenv").config();
+const path = require("path");
+// Load server/.env no matter which folder the app is started from
+// (e.g. `npm start` from the project root).
+require("dotenv").config({ path: path.join(__dirname, "..", ".env") });
 const app = require("./app");
 const { connectDB } = require("./config/db");
 

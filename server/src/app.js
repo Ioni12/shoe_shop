@@ -1,8 +1,13 @@
 const express = require("express");
 const cors = require("cors");
 const path = require("path");
+const fs = require("fs");
 
 const app = express();
+
+// Hostinger (and most hosts) put the app behind a proxy — needed so
+// express-rate-limit sees the real visitor IP instead of the proxy's.
+app.set("trust proxy", 1);
 
 app.use(
   cors({
@@ -25,6 +30,24 @@ app.use("/api/products", require("./routes/productRoutes"));
 app.use("/api/orders", require("./routes/orderRoutes"));
 app.use("/api/auth", require("./routes/authRoutes"));
 app.use("/api/reviews", require("./routes/reviewRoutes"));
+
+// Serve the built React app (client/dist) when it exists, so the whole site
+// runs as one Node process. Any non-API GET falls back to index.html so
+// React Router can handle the route.
+const clientDist = path.join(__dirname, "..", "..", "client", "dist");
+if (fs.existsSync(path.join(clientDist, "index.html"))) {
+  app.use(express.static(clientDist));
+  app.use((req, res, next) => {
+    if (
+      req.method !== "GET" ||
+      req.path.startsWith("/api") ||
+      req.path.startsWith("/uploads")
+    ) {
+      return next();
+    }
+    res.sendFile(path.join(clientDist, "index.html"));
+  });
+}
 
 // 404 handler
 app.use((req, res) => {
