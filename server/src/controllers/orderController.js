@@ -76,10 +76,10 @@ async function createOrder(req, res, next) {
       }
 
       // Snapshot name as {sq, en} object
-      const nameSq =
-        typeof product.name === "object" ? product.name.sq || "" : product.name || "";
-      const nameEn =
-        typeof product.name === "object" ? product.name.en || "" : "";
+      const productName = String(product.name || "").trim();
+
+           const nameSq = productName;
+           const nameEn = productName;
 
       orderItems.push({
         product: product._id,
